@@ -1,9 +1,11 @@
 import SwiftUI
 import SwiftData
 
-class DetailsEntryModel: ObservedObject {
+class DetailsEntryModel: ObservableObject {
     var projectItem: Project?
     var taskItem: Task?
+    
+    @Published var taskIsNil: Bool = false
     
     @Published var taskItemTitle: String = ""
     @Published var taskItemDesc: String = ""
@@ -14,7 +16,7 @@ class DetailsEntryModel: ObservedObject {
     @Published var priority: Priority = .None
     
     @Query var tags: [Tag]
-    
+
     func resetState() -> Void {
         
     }
