@@ -8,34 +8,92 @@ struct ProjectView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.colorScheme) private var scheme
     
+    @State private var showingEntry: Bool = false
+    @State private var showingSettings: Bool = false
+    
+    @Namespace private var animation
+    
     @EnvironmentObject var accentColorManager: AccentColorManager
     
     var body: some View {
         NavigationStack {
-            VStack {
-                Divider()
-                    .frame(height: 3)
-                    .foregroundStyle(.white.opacity(0.4))
-                    .padding(.bottom, 10)
-                    .hidden()
+            ZStack (alignment: .bottomTrailing) {
                 
-                if projects.isEmpty {
-                    emptyProject()
-                } else {
-                    List {
-                        ForEach(projects, id: \.id) { project in
-                            NavigationLink(destination: DetailsView(projectItem: project)) {
-                                projectItem(project) 
-                            } //NavigationLink
-                        } //ForEach
-                        
-                        .scrollIndicators(.hidden)
-                        .listRowSeparator(.hidden)
+                Color.black
+                    .ignoresSafeArea(.all)
+                    .opacity(showingEntry ? 0.2 : 0)
+                    .onTapGesture {
+                        withAnimation {
+                            showingEntry.toggle()
+                        }
                     }
+                
+                Image(systemName: "plus.circle.fill")
+                    .resizable()
+                    .imageScale(.large)
+                    .frame(width: 50, height: 50)
+                    .padding()
+                    .foregroundStyle(accentColorManager.accentColor)
+                    .rotationEffect(showingEntry ? .degrees(45) : .zero)
                     
-                    .listStyle(.plain)
-                    .tint(accentColorManager.accentColor)
+                    .onTapGesture {
+                        withAnimation {
+                            showingEntry.toggle()
+                        }
+                    }
+                
+                VStack {
+                    Divider()
+                        .frame(height: 3)
+                        .foregroundStyle(.white.opacity(0.4))
+                        .padding(.bottom, 10)
+                        .hidden()
+                    
+                    if projects.isEmpty {
+                        emptyProject()
+                    } else {
+                        List {
+                            ForEach(projects, id: \.id) { project in
+                                NavigationLink(destination: DetailsView(projectItem: project)) {
+                                    projectItem(project)
+                                } //NavigationLink
+                            } //ForEach
+                            
+                            .scrollIndicators(.hidden)
+                            .listRowSeparator(.hidden)
+                        }
+                        
+                    
+                        .listStyle(.plain)
+                        .tint(accentColorManager.accentColor)
+                        .border(.red)
+                    }
                 }
+                
+                if (showingEntry) {
+                    NewProjectEntry()
+                        .frame(width: .infinity, height: 300, alignment: .center)
+                        .transition(.scale(scale: 0.1).animation(.snappy).combined(with: .opacity))
+                        .zIndex(1)
+                }
+            }
+            
+            .navigationTitle("Projects")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingSettings.toggle()
+                    } label: {
+                        Image(systemName: "gear")
+                    }
+                }
+            }
+            
+            .tint(accentColorManager.accentColor)
+            
+            .sheet(isPresented: $showingSettings) {
+                Settings()
             }
         }
     }

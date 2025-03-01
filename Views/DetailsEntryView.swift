@@ -10,25 +10,35 @@ struct DetailsEntryView: View {
     
     var body: some View {
         HStack (alignment: .center) {
-            Image(systemName: "circle")
-                .opacity(viewModel.taskItem != nil ? 1.0 : 0.3)
             
             VStack (alignment: .leading) {
                 TextField("New task", text: $viewModel.taskItemTitle)
-                    .font(.headline)
+                    .font(.title3.bold())
                 
-                Divider()
-                
-                Text("Description")
-                    .font(.caption2.bold())
+                TextField("" ,text: $viewModel.taskItemDesc, axis: .vertical)
+                    .font(.subheadline.bold())
+                    .scrollContentBackground(.hidden)
+                    .padding()
+                    .lineLimit(3)
+                    .submitLabel(.done)
                     .foregroundStyle(Color(uiColor: .secondaryLabel))
                 
-                TextEditor(text: $viewModel.taskItemDesc)
-                    .font(.subheadline)
-                    .scrollContentBackground(.hidden)
+                    .background(
+                        Color(uiColor: .secondarySystemBackground)
+                    )
+                
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                
                     .overlay {
-                        
+                        if (viewModel.taskItemDesc.isEmpty) {
+                            Text("Description")
+                                .font(.subheadline.bold())
+                                .foregroundStyle(Color(uiColor: .secondaryLabel))
+                                .frame(maxWidth: .infinity, alignment: .center)
+                        }
                     }
+                
+                    .scaledToFill()
                 
                 HStack {
                     Menu {
@@ -41,11 +51,10 @@ struct DetailsEntryView: View {
                         Text(String(describing: viewModel.status))
                             .font(.caption.bold())
                             .padding(5)
-                            .foregroundStyle(Color(hex: project.projectColor))
+                            .foregroundStyle(.white)
                             .background(
                                 Capsule()
-                                    .fill(Color(hex: project.projectColor).opacity(0.2))
-
+                                    .fill(Color(hex: project.projectColor))
                             )
                     }
                     
@@ -58,13 +67,30 @@ struct DetailsEntryView: View {
                     } label: {
                         Text(viewModel.tag != nil ? String(describing: viewModel.tag!.name) : "None")
                             .font(.caption.bold())
-                            .foregroundStyle(Color(hex: project.projectColor))
+                            .foregroundStyle(.white)
                             .padding(5)
                             .background(
                                 Capsule()
-                                    .fill(Color(hex: project.projectColor).opacity(0.2))
-
+                                    .fill(Color(hex: project.projectColor))
                             )
+                    }
+                    
+                    Spacer()
+                    
+                    Menu {
+                        Picker("", selection: $viewModel.priority) {
+                            ForEach(Priority.allCases, id: \.self){priority in
+                                Text(String(describing: priority))
+                            }
+                            
+                            .onChange(of: viewModel.priority) {
+                                viewModel.updatePriority()
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "flag.fill")
+                            .frame(width: 20, height: 20)
+                            .foregroundStyle(task == nil ? .gray : task!.getPriorityColor())
                     }
                 }
             }
@@ -73,9 +99,10 @@ struct DetailsEntryView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(.thinMaterial)
+                .fill(Color(uiColor: .systemBackground))
         )
         .padding(.horizontal)
+        
         .task {
             viewModel.setProjectItem(project)
             

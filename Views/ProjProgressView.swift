@@ -4,10 +4,28 @@ import SwiftData
 struct ProjProgressView: View {
     @Query private var projects: [Project]
     
+    @State private var showingSettings: Bool = false
+    
     @EnvironmentObject var accentColorManager: AccentColorManager
     
     var body: some View {
-        kanban()
+        NavigationStack {
+             kanban()
+                .navigationTitle("Progress")
+                .toolbar {
+                    ToolbarItem (placement: .topBarTrailing) {
+                        Button {
+                            showingSettings.toggle()
+                        } label: {
+                            Image(systemName: "gear")
+                        }
+                    }
+                }
+        }
+        
+        .sheet(isPresented: $showingSettings) {
+            Settings()
+        }
     }
     
     @ViewBuilder

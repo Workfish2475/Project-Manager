@@ -175,19 +175,21 @@ struct TaskCardView: View {
                             .fontWeight(.bold)
                     }
                     
-                    .confirmationDialog("Are you sure?", isPresented: $presentingConfirm) {
-                        Button ("Delete", role: .destructive) {
-                            dismiss()
-                            
-                            taskItem.project?.ProjectTasks.removeAll(where: {
-                                $0.id == taskItem.id
-                            })
-                            
-                            context.delete(taskItem)
-                        }
-                    } message: {
-                        Text("Delete this task?")
-                    }
+//                    .confirmationDialog("Are you sure?", isPresented: $presentingConfirm) {
+//                        Button ("Delete", role: .destructive) {
+//                            dismiss()
+//                            
+//                            taskItem.project?.ProjectTasks.removeAll(where: {
+//                                $0.id == taskItem.id
+//                            })
+//                            
+//                            context.delete(taskItem)
+//                        }
+//                    } message: {
+//                        Text("Delete this task?")
+//                    }
+                    
+                    
                     
                     Divider()
                     
@@ -207,6 +209,12 @@ struct TaskCardView: View {
                 .padding()
                 
                 Spacer()
+            }
+            
+            .overlay {
+                if (presentingConfirm) {
+                   Text("Something")
+                }
             }
             
             .navigationBarTitleDisplayMode(.inline)

@@ -15,6 +15,8 @@ class DetailsEntryModel: ObservableObject {
     @Published var status: Status = .Backlog
     @Published var priority: Priority = .None
     
+    @Published var addingDesc: Bool = false
+    
     @Query var tags: [Tag]
 
     func resetState() -> Void {
@@ -55,5 +57,13 @@ class DetailsEntryModel: ObservableObject {
         }
         
         taskItem.project = projectItem
+    }
+    
+    func updatePriority() -> Void {
+        guard let taskItem = taskItem else {
+            return
+        }
+        
+        taskItem.priority = priority
     }
 }

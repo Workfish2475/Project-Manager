@@ -1,15 +1,14 @@
 import SwiftUI
 import SwiftData
 
-// TODO: This needs to be refactored to incorporate the viewModel
-
 struct DetailsView: View {
     var projectItem: Project
     
-     var viewModel: DetailsViewModel = DetailsViewModel()
+    @StateObject var viewModel: DetailsViewModel = DetailsViewModel()
     
     @State private var addingTask: Bool = false
     @State private var isEditing: Bool = false
+    @State private var deletingTasks: Bool = false
     @State private var changingColor: Bool = false
     @State private var selectedTask: Task? = nil
     
@@ -20,25 +19,45 @@ struct DetailsView: View {
     
     var body: some View {
         NavigationStack {
-            GeometryReader {geo in
-                    ScrollView(.vertical) {
-                        dashBoardView()   
-                        
-                        Divider()
-                            .frame(width: 50)
-                            .padding(.bottom)
-                        
+            ZStack (alignment: .bottom) {
+                GeometryReader{geo in
+                    ScrollView (.vertical) {
+                        dashBoardView()
                         
                         if (projectItem.ProjectTasks.isEmpty) {
                             emptyView()
-                                
+                                .frame(idealHeight: geo.size.height * 0.7)
                         } else {
                             taskListView()
                         }
                     }
-                    
-                    .scrollIndicators(.hidden)
+                }
                 
+                
+                Color.black
+                    .opacity(viewModel.addingTask ? 0.7 : 0)
+                    .ignoresSafeArea(.all)
+                    .animation(.snappy(duration: 0.2), value: viewModel.addingTask)
+                    .onTapGesture {
+                        withAnimation(.bouncy(duration: 0.4)) {
+                            viewModel.addingTask = false
+                        }
+                    }
+                
+                if viewModel.addingTask {
+                    DetailsEntryView(project: projectItem, task: viewModel.selectedTask)
+                        .frame(width: .infinity, height: 150, alignment: .bottom)
+                        .transition(
+                            .asymmetric(
+                                insertion: .move(edge: .bottom).combined(with: .scale(scale: 1.05)),
+                                removal: .offset(y: 250).combined(with: .scale(scale: 0.95))
+                            )
+                        )
+                        
+                        .sensoryFeedback(.impact, trigger: viewModel.addingTask)
+                        .padding(.vertical)
+                        .zIndex(1)
+                }
             }
             
             .navigationBarTitleDisplayMode(.inline)
@@ -53,18 +72,27 @@ struct DetailsView: View {
                     }
                 }
                 
-                ToolbarItem(placement: .bottomBar) {
-                    Button {
-                        addingTask = true
-                    } label: {
-                        Label("New task", systemImage: "plus.circle.fill")
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button (viewModel.deletingTasks ? "Done" : "Edit") {
+                        viewModel.deletingTasks.toggle()
                     }
+                    
+                    .disabled(viewModel.addingTask)
+                    .disabled(projectItem.isArchived)
                 }
                 
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button ("Edit") {
-                        
+                ToolbarItem(placement: .bottomBar) {
+                    Button {
+                        withAnimation (.snappy) {
+                            viewModel.addingTask = true
+                        }
+                    } label: {
+                        Label("New task", systemImage: "plus.circle.fill")
+                            .imageScale(.large)
                     }
+                    
+                    .disabled(viewModel.addingTask)
+                    .disabled(projectItem.isArchived)
                 }
             }
         }
@@ -72,12 +100,19 @@ struct DetailsView: View {
         .tint(Color(hex: projectItem.projectColor))
         .preferredColorScheme(appearance.colorScheme)
         
-        //Replace this with .task
-        .onAppear() {
+        .task {
             viewModel.setProject(projectItem)
         }
         
-        .sheet(isPresented: $isEditing){
+        .onChange(of: viewModel.addingTask) {
+            if !viewModel.addingTask {
+                DispatchQueue.main.asyncAfter(deadline: .now(), qos: .userInteractive) {
+                    viewModel.clearSelectedTask()
+                }
+            }
+        }
+        
+        .sheet(isPresented: $viewModel.isEditing){
             DetailsViewSubView(projectItem: projectItem)
         }
     }
@@ -130,11 +165,11 @@ struct DetailsView: View {
                                 .frame(height: 20)
                                 .onTapGesture {
                                     withAnimation {
-                                        changingColor.toggle()
+                                        viewModel.changingColor.toggle()
                                     }
                                 }
                             
-                            if (changingColor) {
+                            if (viewModel.changingColor) {
                                 Divider() 
                                     .frame(height: 10)
                                 
@@ -147,7 +182,7 @@ struct DetailsView: View {
                                                 .onTapGesture {
                                                     projectItem.projectColor = color.getColorHex()
                                                     withAnimation {
-                                                        changingColor = false
+                                                        viewModel.changingColor = false
                                                     }
                                                 }
                                         }
@@ -179,42 +214,31 @@ struct DetailsView: View {
         
         .padding()
         .onTapGesture {
-            isEditing = true
-        }
-    }
-    
-    @ViewBuilder
-    func generalView() -> some View {
-        if projectItem.ProjectTasks.isEmpty {
-            emptyView()
-        } else {
-            taskListView()
+            viewModel.isEditing = true
         }
     }
     
     @ViewBuilder
     func projectTasksUpdated(_ taskItem: Task) -> some View {
         HStack (alignment: .center) {
-            Image(systemName: "circle")
+            Image(systemName: taskItem.isCompleted ? "checkmark.circle.fill" : "circle")
+                .onTapGesture {
+                    taskItem.isCompleted.toggle()
+                }
             
             VStack (alignment: .leading) {
                 Text(taskItem.title)
                     .font(.headline)
                 
-                Divider()
-                
                 if !(taskItem.desc.isEmpty) {
-                    Text("Description")
-                        .font(.caption2.bold())
-                        .foregroundStyle(Color(uiColor: .secondaryLabel))
-                    
                     Text(taskItem.desc)
                         .font(.subheadline)
+                        .foregroundStyle(Color(uiColor: .secondaryLabel))
                 }
                 
                 HStack {
                     Text(String(describing: taskItem.status))
-                        .font(.caption)
+                        .font(.caption.bold())
                         .padding(5)
                         .background(
                             RoundedRectangle(cornerRadius: 10)
@@ -224,7 +248,7 @@ struct DetailsView: View {
                     
                     if (taskItem.tag != nil) {
                         Text(String(describing: taskItem.tag!.name))
-                            .font(.caption)
+                            .font(.caption.bold())
                             .padding(5)
                             .background(
                                 RoundedRectangle(cornerRadius: 10)
@@ -234,15 +258,31 @@ struct DetailsView: View {
                     }
                 }
             }
+            
+            Spacer()
         }
         
-        
+        .frame(maxWidth: .infinity)
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color(uiColor: .secondarySystemBackground))
         )
         .padding(.horizontal)
+        
+        .onTapGesture {
+            withAnimation (.snappy(duration: 0.3, extraBounce: 0.2)) {
+                viewModel.setSelectedTask(taskItem)
+                viewModel.addingTask = true
+            }
+        }
+    }
+    
+    @ViewBuilder
+    func updatedTaskEntry() -> some View {
+        HStack (alignment: .center) {
+            
+        }
     }
     
     @ViewBuilder
@@ -269,17 +309,9 @@ struct DetailsView: View {
     @ViewBuilder
     func taskListView() -> some View {
         ForEach(projectItem.ProjectTasks, id: \.id){task in
-            DetailsEntryView(project: projectItem, task: task)
-        }
-        
-        ScrollViewReader {proxy in
-            if (addingTask) {
-                DetailsEntryView(project: projectItem, task: nil)
-                    .id("newTaskEntry")
-                    .onAppear {
-                        proxy.scrollTo("newTaskEntry") 
-                    }
-            }
+            projectTasksUpdated(task)
+                .opacity(projectItem.isArchived ? 0.7 : 1)
+                .disabled(projectItem.isArchived)
         }
     }
 }
@@ -297,7 +329,7 @@ struct DetailView_Previews: PreviewProvider {
         let newTask = Task(title: "Design task view", desc: "Test some things and write some test cases. Do some Unit testing.", tag: newTag2)
         let newTask1 = Task(title: "Design task view", tag: newTag1)
         
-        let newProject = Project(projectName: "Fini", projectColor: "#1E90FF", projectTasks: [newTask])
+        let newProject = Project(projectName: "Fini", projectColor: "#1E90FF", projectTasks: [newTask, newTask1])
         
         container.mainContext.insert(newTag1)
         container.mainContext.insert(newTag2)
