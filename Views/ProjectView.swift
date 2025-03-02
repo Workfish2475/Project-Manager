@@ -4,7 +4,7 @@ import SwiftData
 //TODO: This should only fetch projects that are NOT archived. 
 
 struct ProjectView: View {
-    @Query var projects: [Project]
+    @Query(filter: #Predicate<Project> {!$0.isArchived}) var projects: [Project]
     @Environment(\.modelContext) private var context
     @Environment(\.colorScheme) private var scheme
     
@@ -22,6 +22,7 @@ struct ProjectView: View {
                 Color.black
                     .ignoresSafeArea(.all)
                     .opacity(showingEntry ? 0.2 : 0)
+                    .zIndex(1)
                     .onTapGesture {
                         withAnimation {
                             showingEntry.toggle()
@@ -35,7 +36,7 @@ struct ProjectView: View {
                     .padding()
                     .foregroundStyle(accentColorManager.accentColor)
                     .rotationEffect(showingEntry ? .degrees(45) : .zero)
-                    
+                    .zIndex(2)
                     .onTapGesture {
                         withAnimation {
                             showingEntry.toggle()
@@ -66,7 +67,6 @@ struct ProjectView: View {
                     
                         .listStyle(.plain)
                         .tint(accentColorManager.accentColor)
-                        .border(.red)
                     }
                 }
                 
