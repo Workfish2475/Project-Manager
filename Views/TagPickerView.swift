@@ -4,6 +4,9 @@ import SwiftData
 struct TagPickerView: View {
     
     //Implement a binding item here
+    //Implement viewModel here
+    @StateObject private var viewModel: TagPickerModel = TagPickerModel()
+    @FocusState private var focusTagField: Bool
     
     @State private var addingTag: Bool = false
     @State private var isEditing: Bool = false
@@ -217,15 +220,15 @@ struct ContentView_Previews: PreviewProvider {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: Tag.self, configurations: config)
         
-//        let newTag1 = Tag(name: "Testing")
-//        let newTag2 = Tag(name: "Testing")
-//        let newTag3 = Tag(name: "Testing")
-//        let newTag4 = Tag(name: "Testing")
-//        
-//        container.mainContext.insert(newTag1)
-//        container.mainContext.insert(newTag2)
-//        container.mainContext.insert(newTag3)
-//        container.mainContext.insert(newTag4)
+        let newTag1 = Tag(name: "Testing")
+        let newTag2 = Tag(name: "Testing")
+        let newTag3 = Tag(name: "Testing")
+        let newTag4 = Tag(name: "Testing")
+        
+        container.mainContext.insert(newTag1)
+        container.mainContext.insert(newTag2)
+        container.mainContext.insert(newTag3)
+        container.mainContext.insert(newTag4)
         
         return TagPickerView()
             .modelContainer(container)

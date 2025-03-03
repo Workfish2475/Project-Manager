@@ -12,7 +12,6 @@ struct ProjectView: View {
     @State private var showingSettings: Bool = false
     
     @Namespace private var animation
-    
     @EnvironmentObject var accentColorManager: AccentColorManager
     
     var body: some View {
@@ -94,6 +93,12 @@ struct ProjectView: View {
             
             .sheet(isPresented: $showingSettings) {
                 Settings()
+            }
+            
+            .onChange(of: projects) {
+                withAnimation {
+                    showingEntry = false
+                }
             }
         }
     }

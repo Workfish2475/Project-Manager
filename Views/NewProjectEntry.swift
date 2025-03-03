@@ -9,6 +9,8 @@ import SwiftUI
 
 struct NewProjectEntry: View {
     
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @StateObject var viewModel:NewProjectEntryModel = NewProjectEntryModel()
     
     var body: some View {
@@ -18,7 +20,8 @@ struct NewProjectEntry: View {
                 .font(.system(size: 30, weight: .bold, design: .none))
                 .submitLabel(.done)
                 .onSubmit {
-                    viewModel.saveProject()
+                    viewModel.saveProject(modelContext)
+                    dismiss()
                 }
             
             ScrollView (.horizontal) {
@@ -27,7 +30,6 @@ struct NewProjectEntry: View {
                         Circle()
                             .fill(color)
                             .frame(width: 25, height: 25)
-                        
                             .onTapGesture {
                                 withAnimation {
                                     viewModel.changeColor(color)

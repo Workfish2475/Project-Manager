@@ -12,11 +12,24 @@ class NewProjectEntryModel: ObservableObject {
     @Published var name: String = ""
     @Published var color: Color = Color.allList[0]
     
-    func saveProject() -> Void {
+    func saveProject(_ modelContext: ModelContext) -> Void {
+        if (name.isEmpty) {
+            return
+        }
+        
+        let newProject = Project(projectName: name, projectColor: color.rawValue)
+        resetState()
+        
+        modelContext.insert(newProject)
         
     }
     
     func changeColor(_ color: Color) -> Void {
         self.color = color
+    }
+    
+    func resetState() -> Void {
+        name.removeAll()
+        color = Color.allList[0]
     }
 }
