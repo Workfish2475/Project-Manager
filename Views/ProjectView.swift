@@ -1,8 +1,6 @@
 import SwiftUI
 import SwiftData
 
-//TODO: This should only fetch projects that are NOT archived. 
-
 struct ProjectView: View {
     @Query(filter: #Predicate<Project> {!$0.isArchived}) var projects: [Project]
     @Environment(\.modelContext) private var context

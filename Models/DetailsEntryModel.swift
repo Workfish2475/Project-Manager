@@ -19,8 +19,14 @@ class DetailsEntryModel: ObservableObject {
     
     @Query var tags: [Tag]
 
+    //TODO: Look over this to make sure this is good before pushing.
     func resetState() -> Void {
-        
+        addingDesc = false
+        taskItemTitle.removeAll()
+        taskItemDesc.removeAll()
+        status = .Backlog
+        priority = .None
+        tag = nil
     }
     
     func setProjectItem(_ projectItem: Project) -> Void {
@@ -46,8 +52,15 @@ class DetailsEntryModel: ObservableObject {
         projectItem.ProjectTasks.append(task)
     }
     
-    func saveTask(_ task: Task, context: ModelContext) -> Void {
-        context.insert(task)
+    //TODO: Look over this to make sure this is good before pushing.
+    func saveTask(_ context: ModelContext) -> Void {
+        if (taskItemTitle.isEmpty) {
+            return
+        }
+        
+        let newTask = Task(title: taskItemTitle, desc: taskItemDesc, tag: tag,status: status, priority: priority, project: projectItem!)
+        context.insert(newTask)
+        resetState()
     }
     
     func setProject() {

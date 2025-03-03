@@ -6,6 +6,7 @@ struct DetailsEntryView: View {
     var project: Project
     var task: Task? = nil
     
+    @Environment(\.modelContext) private var modelContext
     @StateObject var viewModel: DetailsEntryModel = DetailsEntryModel()
     
     var body: some View {
@@ -14,6 +15,9 @@ struct DetailsEntryView: View {
             VStack (alignment: .leading) {
                 TextField("New task", text: $viewModel.taskItemTitle)
                     .font(.title3.bold())
+                    .onSubmit {
+                        viewModel.saveTask(modelContext)
+                    }
                 
                 TextField("" ,text: $viewModel.taskItemDesc, axis: .vertical)
                     .font(.subheadline.bold())
@@ -22,13 +26,11 @@ struct DetailsEntryView: View {
                     .lineLimit(3)
                     .submitLabel(.done)
                     .foregroundStyle(Color(uiColor: .secondaryLabel))
-                
                     .background(
                         Color(uiColor: .secondarySystemBackground)
                     )
                 
                     .clipShape(RoundedRectangle(cornerRadius: 10))
-                
                     .overlay {
                         if (viewModel.taskItemDesc.isEmpty) {
                             Text("Description")
@@ -36,6 +38,10 @@ struct DetailsEntryView: View {
                                 .foregroundStyle(Color(uiColor: .secondaryLabel))
                                 .frame(maxWidth: .infinity, alignment: .center)
                         }
+                    }
+                
+                    .onSubmit {
+                        viewModel.saveTask(modelContext)
                     }
                 
                     .scaledToFill()
