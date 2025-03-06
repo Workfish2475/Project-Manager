@@ -17,6 +17,8 @@ struct DetailsView: View {
     @AppStorage("appearance") var appearance: Appearance = .system
     @Environment(\.modelContext) private var context
     
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
         NavigationStack {
             ZStack (alignment: .bottom) {
@@ -26,7 +28,7 @@ struct DetailsView: View {
                         
                         if (projectItem.ProjectTasks.isEmpty) {
                             emptyView()
-                                .frame(idealHeight: geo.size.height * 0.7)
+                                .frame(idealHeight: geo.size.height * 0.65)
                         } else {
                             taskListView()
                         }
@@ -50,7 +52,7 @@ struct DetailsView: View {
                         .transition(
                             .asymmetric(
                                 insertion: .move(edge: .bottom).combined(with: .scale(scale: 1.05)),
-                                removal: .offset(y: 250).combined(with: .scale(scale: 0.95))
+                                removal: .offset(y: 350).combined(with: .scale(scale: 0.95))
                             )
                         )
                         
@@ -61,7 +63,7 @@ struct DetailsView: View {
             }
             
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(.hidden, for: .tabBar) 
+            .toolbar(.hidden, for: .tabBar)
             .toolbar {
                 ToolbarItem(placement: .principal){
                     VStack {
@@ -95,11 +97,21 @@ struct DetailsView: View {
                     .disabled(viewModel.addingTask)
                     .disabled(projectItem.isArchived)
                 }
+                
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Label("Back", systemImage: "chevron.left")
+                            .labelStyle(.titleAndIcon)
+                    }
+                }
             }
         }
         
         .tint(Color(hex: projectItem.projectColor))
         .preferredColorScheme(appearance.colorScheme)
+        .navigationBarBackButtonHidden(true)
         
         .task {
             viewModel.setProject(projectItem)
@@ -123,7 +135,7 @@ struct DetailsView: View {
     func dashBoardView() -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
-                .fill(.thinMaterial)
+                .fill(Color(uiColor: .secondarySystemBackground))
             
             HStack {
                 VStack (alignment: .leading, spacing: 10) {
@@ -280,17 +292,10 @@ struct DetailsView: View {
     }
     
     @ViewBuilder
-    func updatedTaskEntry() -> some View {
-        HStack (alignment: .center) {
-            
-        }
-    }
-    
-    @ViewBuilder
     func emptyView() -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
-                .fill(.thinMaterial)
+                .fill(Color(uiColor: .secondarySystemBackground))
             
             VStack (alignment: .center, spacing: 10) {
                 Spacer() 
@@ -330,7 +335,7 @@ struct DetailView_Previews: PreviewProvider {
         let newTask = Task(title: "Design task view", desc: "Test some things and write some test cases. Do some Unit testing.", tag: newTag2)
         let newTask1 = Task(title: "Design task view", tag: newTag1)
         
-        let newProject = Project(projectName: "Fini", projectColor: "#1E90FF", projectTasks: [newTask, newTask1])
+        let newProject = Project(projectName: "Fini", projectColor: "#1E90FF", projectTasks: [])
         
         container.mainContext.insert(newTag1)
         container.mainContext.insert(newTag2)

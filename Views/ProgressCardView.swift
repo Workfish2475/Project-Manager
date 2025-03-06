@@ -173,7 +173,7 @@ struct ProgressCardView: View {
 struct ProjCardView_Previews: PreviewProvider {
     static var previews: some View {
         // Configure an in-memory-only model container for testing
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let config = ModelConfiguration(isStoredInMemoryOnly: false)
         let container = try! ModelContainer(for: Tag.self, Task.self, Project.self, configurations: config)
         
         // Create unique tags
