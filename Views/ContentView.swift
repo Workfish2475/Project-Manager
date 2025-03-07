@@ -1,6 +1,5 @@
 import SwiftUI
 
-//TODO: This should make use of some sort of Design Pattern (MVVM or MVC)
 
 struct ContentView: View {
     @State private var selectedItem: Int = 0

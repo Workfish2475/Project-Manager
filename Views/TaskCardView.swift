@@ -33,16 +33,18 @@ struct TaskCardView: View {
                         Spacer()
                     }
                     .padding(.horizontal)
+                    .padding(.bottom)
                 }
                 
-                TextEditor(text: $descField)
+                TextField("", text: $descField, axis: .vertical)
                     .font(.system(size: 18))
                     .scrollContentBackground(.hidden)
                     .submitLabel(.done)
                     .scrollIndicators(.hidden)
                     .focused($editingDesc)
                     .padding()
-                    .frame(height: 75)
+                    .lineLimit(3)
+                    .frame(maxHeight: 100)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color(uiColor: .secondarySystemBackground))
@@ -59,6 +61,8 @@ struct TaskCardView: View {
                                 .foregroundStyle(Color(uiColor: .secondaryLabel))
                         }
                     }
+                
+                    .scaledToFill()
                 
                 HStack {
                     Text("Priority")
@@ -174,22 +178,6 @@ struct TaskCardView: View {
                         Image(systemName: "trash.fill")
                             .fontWeight(.bold)
                     }
-                    
-//                    .confirmationDialog("Are you sure?", isPresented: $presentingConfirm) {
-//                        Button ("Delete", role: .destructive) {
-//                            dismiss()
-//                            
-//                            taskItem.project?.ProjectTasks.removeAll(where: {
-//                                $0.id == taskItem.id
-//                            })
-//                            
-//                            context.delete(taskItem)
-//                        }
-//                    } message: {
-//                        Text("Delete this task?")
-//                    }
-                    
-                    
                     
                     Divider()
                     

@@ -41,14 +41,9 @@ struct ProjectView: View {
                     }
                 
                 VStack {
-                    Divider()
-                        .frame(height: 3)
-                        .foregroundStyle(.white.opacity(0.4))
-                        .padding(.bottom, 10)
-                        .hidden()
-                    
                     if projects.isEmpty {
                         emptyProject()
+                            .containerRelativeFrame(.horizontal)
                     } else {
                         List {
                             ForEach(projects, id: \.id) { project in
@@ -70,7 +65,7 @@ struct ProjectView: View {
                 if (showingEntry) {
                     NewProjectEntry()
                         .frame(width: .infinity, height: 300, alignment: .center)
-                        .transition(.scale(scale: 0.1).animation(.snappy).combined(with: .opacity))
+                        .transition(.scale(scale: 0.1).animation(.snappy(duration: 0.4)).combined(with: .opacity))
                         .zIndex(1)
                 }
             }
@@ -103,8 +98,8 @@ struct ProjectView: View {
     
     @ViewBuilder
     func emptyProject() -> some View {
-        VStack(spacing: 10) {
-            Spacer() 
+        VStack(alignment: .center, spacing: 10) {
+            Spacer()
             
             Image(systemName: "hammer.circle.fill")
                 .resizable()
@@ -124,7 +119,7 @@ struct ProjectView: View {
     func projectItem(_ projectItem: Project) -> some View {
         VStack (alignment: .leading, spacing: 5) {
             Text("\(projectItem.projectName)")
-                .font(.title2.bold())
+                .font(.title3.bold())
                 .foregroundStyle(scheme == .light ? .black : .white)
             
             ProgressView("Progress", value: projectItem.progressValue() * 100, total: 100)

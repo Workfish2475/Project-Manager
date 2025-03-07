@@ -8,13 +8,6 @@ struct ProgressCardView: View {
     @State var selectedTask: Task? = nil
     @EnvironmentObject var accentColorManager: AccentColorManager
     
-    var count: Int {
-        projects.map { project in
-            project.ProjectTasks.filter { $0.status == currentStatus }.count
-        }
-        .reduce(0, +)
-    }
-    
     var projectItems: [Task] {
         let uniqueTasks = Set(
             projects.flatMap { project in
@@ -42,7 +35,7 @@ struct ProgressCardView: View {
                 
                 Spacer()
                 
-                Text("\(count)")
+                Text("0")
                     .font(.title3.bold())
                     .fontDesign(.rounded)
             }
@@ -73,7 +66,7 @@ struct ProgressCardView: View {
                 
                 Spacer()
                 
-                Text("\(count)")
+                Text("\(projectItems.count)")
                     .font(.title3.bold())
                     .fontDesign(.rounded)
             }
@@ -98,7 +91,7 @@ struct ProgressCardView: View {
         
         .sheet(item: $selectedTask) {task in
             TaskCardView(taskItem: task)
-                .presentationDetents([.medium, .large])
+                .presentationDetents([.height(500), .large])
         }
     }
     
@@ -165,8 +158,6 @@ struct ProgressCardView: View {
             RoundedRectangle(cornerRadius: 10)
                 .fill(accentColorManager.accentColor)
         )
-        
-//        .draggable(task)
     }
 }
 

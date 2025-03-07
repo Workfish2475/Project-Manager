@@ -6,12 +6,6 @@ struct DetailsView: View {
     
     @StateObject var viewModel: DetailsViewModel = DetailsViewModel()
     
-    @State private var addingTask: Bool = false
-    @State private var isEditing: Bool = false
-    @State private var deletingTasks: Bool = false
-    @State private var changingColor: Bool = false
-    @State private var selectedTask: Task? = nil
-    
     @Namespace private var animation
     @EnvironmentObject var accentColorManager: AccentColorManager
     @AppStorage("appearance") var appearance: Appearance = .system
@@ -63,7 +57,6 @@ struct DetailsView: View {
             }
             
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(.hidden, for: .tabBar)
             .toolbar {
                 ToolbarItem(placement: .principal){
                     VStack {
@@ -112,6 +105,7 @@ struct DetailsView: View {
         .tint(Color(hex: projectItem.projectColor))
         .preferredColorScheme(appearance.colorScheme)
         .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .tabBar)
         
         .task {
             viewModel.setProject(projectItem)

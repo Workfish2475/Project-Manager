@@ -3,7 +3,6 @@ import SwiftData
 
 struct ProjProgressView: View {
     @Query private var projects: [Project]
-    
     @State private var showingSettings: Bool = false
     
     @EnvironmentObject var accentColorManager: AccentColorManager
