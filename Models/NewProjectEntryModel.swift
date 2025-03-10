@@ -17,7 +17,7 @@ class NewProjectEntryModel: ObservableObject {
             return
         }
         
-        let newProject = Project(projectName: name, projectColor: color.rawValue)
+        let newProject = Project(projectName: name, projectColor: color.getColorHex())
         resetState()
         
         modelContext.insert(newProject)

@@ -9,7 +9,7 @@ struct MyApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(accentColor)
-                .modelContainer(for: [Tag.self, Project.self])
+                .modelContainer(for: [Tag.self, Project.self, Task.self])
         }
     }
 }

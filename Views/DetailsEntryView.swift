@@ -6,6 +6,7 @@ struct DetailsEntryView: View {
     var project: Project
     var task: Task? = nil
     
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @StateObject var viewModel: DetailsEntryModel = DetailsEntryModel()
     

@@ -1,6 +1,8 @@
 import SwiftUI
 import SwiftData
 
+//This may be triggering the re-render
+
 struct ProgressCardView: View {
     let currentStatus: Status
     let projects: [Project]

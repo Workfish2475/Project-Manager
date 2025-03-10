@@ -199,12 +199,6 @@ struct TaskCardView: View {
                 Spacer()
             }
             
-            .overlay {
-                if (presentingConfirm) {
-                   Text("Something")
-                }
-            }
-            
             .navigationBarTitleDisplayMode(.inline)
              .toolbar {
                  ToolbarItem(placement: .topBarTrailing) {
@@ -260,7 +254,6 @@ struct TaskCardView_Previews: PreviewProvider {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: Tag.self, Task.self, Project.self, configurations: config)
         
-        // Create mock data
         let newTag = Tag(name: "Testing")
         let newTag1 = Tag(name: "QoL")
         container.mainContext.insert(newTag)
@@ -269,7 +262,6 @@ struct TaskCardView_Previews: PreviewProvider {
         let taskItem = Task(title: "Finish something", desc: "", tag: newTag)
         container.mainContext.insert(taskItem)
         
-        // Render the preview with the model container
         return TaskCardView(taskItem: taskItem)
             .modelContainer(container)
             .environmentObject(AccentColorManager())
