@@ -4,23 +4,28 @@ import SwiftData
 struct DetailsEntryView: View {
     
     var project: Project
-    var task: Task? = nil
+    var task: Task?
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    
+    @Query var tags: [Tag]
+    
+    @State private var creatingTag: Bool = false
+    @State private var tagName: String = ""
+    
     @StateObject var viewModel: DetailsEntryModel = DetailsEntryModel()
     
     var body: some View {
         HStack (alignment: .center) {
-            
-            VStack (alignment: .leading) {
+            VStack (alignment: .leading, spacing: 15) {
                 TextField("New task", text: $viewModel.taskItemTitle)
                     .font(.title3.bold())
                     .onSubmit {
                         viewModel.saveTask(modelContext)
                     }
                 
-                TextField("" ,text: $viewModel.taskItemDesc, axis: .vertical)
+                TextField("Description" ,text: $viewModel.taskItemDesc, axis: .vertical)
                     .font(.subheadline.bold())
                     .scrollContentBackground(.hidden)
                     .padding()
@@ -32,15 +37,6 @@ struct DetailsEntryView: View {
                     )
                 
                     .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .overlay {
-                        if (viewModel.taskItemDesc.isEmpty) {
-                            Text("Description")
-                                .font(.subheadline.bold())
-                                .foregroundStyle(Color(uiColor: .secondaryLabel))
-                                .frame(maxWidth: .infinity, alignment: .center)
-                        }
-                    }
-                
                     .onSubmit {
                         viewModel.saveTask(modelContext)
                     }
@@ -48,39 +44,63 @@ struct DetailsEntryView: View {
                     .scaledToFill()
                 
                 HStack {
-                    Menu {
-                        Picker("", selection: $viewModel.status){
-                            ForEach(Status.allCases, id: \.self){status in
-                                Text(String(describing: status)) 
+                    HStack (spacing: 5) {
+                        Menu {
+                            Picker("", selection: $viewModel.status){
+                                ForEach(Status.allCases, id: \.self){status in
+                                    Text(String(describing: status)) 
+                                }
                             }
+                        } label: {
+                            Text(String(describing: viewModel.status))
+                                .font(.caption.bold())
+                                .padding(5)
+                                .foregroundStyle(Color(hex: project.projectColor))
                         }
-                    } label: {
-                        Text(String(describing: viewModel.status))
-                            .font(.caption.bold())
-                            .padding(5)
-                            .foregroundStyle(.white)
-                            .background(
+                        
+                        Divider()
+                            .frame(width: 2, height: 10)
+                            .overlay(
                                 Capsule()
                                     .fill(Color(hex: project.projectColor))
                             )
+                        
+                        Menu {
+                            Section("Other") {
+                                Button {
+                                    creatingTag.toggle()
+                                } label: {
+                                    Text("New tag")
+                                }
+                            }
+                            
+                            Divider()
+                            
+                            Section("Tags") {
+                                Picker("", selection: $viewModel.tag) {
+                                    Text("None")
+                                        .tag(nil as Tag?)
+                                    
+                                    ForEach(tags, id: \.id) { tag in
+                                        Text(tag.name)
+                                            .tag(tag)
+                                    }
+                                }
+                            }
+                            
+                        } label: {
+                            Text(viewModel.tag != nil ? viewModel.tag!.name : "None")
+                                .font(.caption.bold())
+                                .foregroundStyle(Color(hex: project.projectColor))
+                                .padding(5)
+                        }
                     }
                     
-                    Menu {
-                        Picker("", selection: $viewModel.tag){
-                            ForEach(viewModel.tags, id: \.id){tag in
-                                Text(tag.name)
-                            }
-                        }
-                    } label: {
-                        Text(viewModel.tag != nil ? String(describing: viewModel.tag!.name) : "None")
-                            .font(.caption.bold())
-                            .foregroundStyle(.white)
-                            .padding(5)
-                            .background(
-                                Capsule()
-                                    .fill(Color(hex: project.projectColor))
-                            )
-                    }
+                    .background(
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(Color(hex: project.projectColor).opacity(0.1))
+                            .stroke(Color(hex: project.projectColor), lineWidth: 1)
+                    )
                     
                     Spacer()
                     
@@ -110,11 +130,17 @@ struct DetailsEntryView: View {
         )
         .padding(.horizontal)
         
+        .popover(isPresented: $creatingTag, arrowEdge: .bottom) {
+            QuickTagEntry()
+                .padding()
+                .frame(minWidth: 350, maxHeight: 400)
+                .presentationCompactAdaptation(.popover)
+        }
+        
         .task {
             viewModel.setProjectItem(project)
-            
             if let task = task {
-                viewModel.setTaskItem(task) 
+                viewModel.setTaskItem(task)
             }
         }
     }
@@ -123,14 +149,14 @@ struct DetailsEntryView: View {
 struct DetailEntryView_Previews: PreviewProvider {
     static var previews: some View {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try! ModelContainer(for: Tag.self, Task.self, configurations: config)
+        let container = try! ModelContainer(for: Tag.self, Task.self, Project.self, configurations: config)
         
         let newTag1 = Tag(name: "Testing")
         let newTag2 = Tag(name: "UI")
         let newTag3 = Tag(name: "Bugs")
         let newTag4 = Tag(name: "User study")
         
-        let newTask = Task(title: "Design task view", desc: "Test some things and write some test cases. Do some Unit testing.", tag: newTag2)
+        let newTask = Task(title: "Design task view", desc: "", tag: newTag2)
         let newTask1 = Task(title: "Design task view", tag: newTag1)
         
         let newProject = Project(projectName: "Fini", projectColor: "#1E90FF", projectTasks: [newTask, newTask1, newTask, newTask, newTask, newTask, newTask])
@@ -140,9 +166,12 @@ struct DetailEntryView_Previews: PreviewProvider {
         container.mainContext.insert(newTag3)
         container.mainContext.insert(newTag4)
         container.mainContext.insert(newTask)
+        container.mainContext.insert(newTask1)
+        container.mainContext.insert(newProject)
         
-        return DetailsView(projectItem: newProject)
+        return DetailsEntryView(project: newProject, task: newTask, viewModel: .init())
             .modelContainer(container)
             .environmentObject(AccentColorManager())
+            .padding(50)
     }
 }

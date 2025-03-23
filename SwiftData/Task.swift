@@ -57,6 +57,19 @@ class Task {
         }
     }
     
+    func getPriorityImage() -> String {
+        switch self.priority {
+        case .None:
+            return "checkmark"
+        case .Low:
+            return "exclamationmark"
+        case .Medium:
+            return "exclamationmark.2"
+        case .High:
+            return "exclamationmark.3"
+        }
+    }
+    
     func getStatusImage() -> String {
         switch self.status {
         case .Backlog:
@@ -67,6 +80,20 @@ class Task {
             return "magnifyingglass"
         case .Done:
             return "checkmark"
+        }
+    }
+    
+    //Testing required
+    func updateStatus() -> Void {
+        switch self.status {
+        case .Backlog:
+            self.status = .Doing
+        case .Doing:
+            self.status = .Done
+        case .Done: 
+            self.status = .Review
+        case .Review:
+            self.status = .Review
         }
     }
 }

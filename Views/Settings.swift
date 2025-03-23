@@ -59,11 +59,11 @@ struct Settings: View {
                         VStack {
                             Spacer()
                             
-                            Text("Made with ❤️ by Alexander")
+                            Text("Fini")
                                 .font(.headline.bold())
                                 .foregroundStyle(Color(uiColor: .secondaryLabel))
                             
-                            Text("Version 1.0")
+                            Text("Made by Alex")
                                 .font(.caption)
                                 .foregroundStyle(Color(uiColor: .secondaryLabel))
                         }

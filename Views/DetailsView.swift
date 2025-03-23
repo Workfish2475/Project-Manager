@@ -16,7 +16,7 @@ struct DetailsView: View {
     var body: some View {
         NavigationStack {
             ZStack (alignment: .bottom) {
-                GeometryReader{geo in
+                GeometryReader { geo in
                     ScrollView (.vertical) {
                         dashBoardView()
                         
@@ -28,32 +28,27 @@ struct DetailsView: View {
                         }
                     }
                 }
-                
-                
-                Color.black
-                    .opacity(viewModel.addingTask ? 0.7 : 0)
-                    .ignoresSafeArea(.all)
-                    .animation(.snappy(duration: 0.2), value: viewModel.addingTask)
-                    .onTapGesture {
-                        withAnimation(.bouncy(duration: 0.4)) {
-                            viewModel.addingTask = false
-                        }
-                    }
-                
+                .disabled(viewModel.addingTask)
+            
                 if viewModel.addingTask {
-                    DetailsEntryView(project: projectItem, task: viewModel.selectedTask)
-                        .frame(width: .infinity, height: 150, alignment: .bottom)
-                        .transition(
-                            .asymmetric(
-                                insertion: .move(edge: .bottom).combined(with: .scale(scale: 1.05)),
-                                removal: .offset(y: 350).combined(with: .scale(scale: 0.95))
-                            )
-                        )
-                        
-                        .sensoryFeedback(.impact, trigger: viewModel.addingTask)
-                        .padding(.vertical)
-                        .zIndex(1)
+                    Color.black
+                        .opacity(0.7)
+                        .ignoresSafeArea(.all)
+                        .transition(.opacity)
+                        .onTapGesture {
+                            hideTaskEntry()
+                        }
                 }
+                
+                
+                DetailsEntryView(project: projectItem, task: viewModel.selectedTask)
+                    .id(viewModel.selectedTask?.id)
+                    .frame(width: .infinity, height: 150, alignment: .bottom)
+                    .offset(y: viewModel.addingTask ? 0 : 350)
+                    .scaleEffect(viewModel.addingTask ? 1.0 : 0.95)
+                    .opacity(viewModel.addingTask ? 1 : 0)
+                    .padding(.vertical)
+                    .zIndex(1)
             }
             
             .navigationBarTitleDisplayMode(.inline)
@@ -79,9 +74,7 @@ struct DetailsView: View {
                 
                 ToolbarItem(placement: .bottomBar) {
                     Button {
-                        withAnimation (.snappy) {
-                            viewModel.addingTask = true
-                        }
+                        showNewTaskEntry()
                     } label: {
                         Label("New task", systemImage: "plus.circle.fill")
                             .imageScale(.large)
@@ -111,19 +104,34 @@ struct DetailsView: View {
             viewModel.setProject(projectItem)
         }
         
-        .onChange(of: viewModel.addingTask) {
-            if !viewModel.addingTask {
-                DispatchQueue.main.asyncAfter(deadline: .now(), qos: .userInteractive) {
-                    viewModel.clearSelectedTask()
-                }
-            }
-        }
-        
         .sheet(isPresented: $viewModel.isEditing){
             DetailsViewSubView(projectItem: projectItem)
         }
     }
     
+    private func showNewTaskEntry() {
+        viewModel.clearSelectedTask()
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            viewModel.addingTask = true
+        }
+    }
+    
+    private func showTaskEntry(task: Task) {
+        viewModel.setSelectedTask(task)
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            viewModel.addingTask = true
+        }
+    }
+    
+    private func hideTaskEntry() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            viewModel.addingTask = false
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            viewModel.clearSelectedTask()
+        }
+    }
     
     @ViewBuilder
     func dashBoardView() -> some View {
@@ -168,7 +176,7 @@ struct DetailsView: View {
                             .fontWeight(.bold)
                         HStack {
                             Circle()
-                                .fill(Color(hex: projectItem.projectColor)) 
+                                .fill(Color(hex: projectItem.projectColor))
                                 .frame(height: 20)
                                 .onTapGesture {
                                     withAnimation {
@@ -177,7 +185,7 @@ struct DetailsView: View {
                                 }
                             
                             if (viewModel.changingColor) {
-                                Divider() 
+                                Divider()
                                     .frame(height: 10)
                                 
                                 ScrollView (.horizontal) {
@@ -193,13 +201,13 @@ struct DetailsView: View {
                                                     }
                                                 }
                                         }
-                                    } 
+                                    }
                                  }
                                 
                                 .scrollIndicators(.hidden)
                             }
                         }
-                    }   
+                    }
                 }
                 
                 Spacer()
@@ -229,6 +237,9 @@ struct DetailsView: View {
     func projectTasksUpdated(_ taskItem: Task) -> some View {
         HStack (alignment: .center) {
             Image(systemName: taskItem.isCompleted ? "checkmark.circle.fill" : "circle")
+                .foregroundStyle(Color(hex: projectItem.projectColor))
+                .symbolEffect(.bounce, value: taskItem.isCompleted)
+                .sensoryFeedback(.impact, trigger: taskItem.isCompleted)
                 .onTapGesture {
                     taskItem.isCompleted.toggle()
                 }
@@ -244,25 +255,42 @@ struct DetailsView: View {
                 }
                 
                 HStack {
-                    Text(String(describing: taskItem.status))
-                        .font(.caption.bold())
-                        .padding(5)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color(hex: projectItem.projectColor).opacity(0.4))
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                        )
-                    
-                    if (taskItem.tag != nil) {
-                        Text(String(describing: taskItem.tag!.name))
+                    HStack (spacing: 0) {
+                        Text(String(describing: taskItem.status))
                             .font(.caption.bold())
                             .padding(5)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color(hex: projectItem.projectColor).opacity(0.4))
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                            )
+                            .foregroundStyle(Color(hex: projectItem.projectColor)) 
+                        
+                        if (taskItem.tag != nil) {
+                            Divider()
+                                .frame(width: 2, height: 10)
+                                .overlay(Color(hex: projectItem.projectColor))
+                                .clipShape(Capsule())
+                            
+                            Text(String(describing: taskItem.tag!.name))
+                                .font(.caption.bold())
+                                .foregroundStyle(Color(hex: projectItem.projectColor))
+                                .padding(5)
+                        }
                     }
+                    
+                    .background(
+                        RoundedRectangle(cornerRadius: 5) 
+                            .fill(Color(hex: projectItem.projectColor).opacity(0.1))
+                            .stroke(Color(hex: projectItem.projectColor), lineWidth: 2)
+                            .clipShape(RoundedRectangle(cornerRadius: 5))
+                    ) 
+                    
+                    Label(String(describing: taskItem.priority), systemImage: taskItem.getPriorityImage())
+                        .font(.caption.bold())
+                        .foregroundStyle(taskItem.getPriorityColor())
+                        .padding(5)
+                        .background(
+                            RoundedRectangle(cornerRadius: 5) 
+                                .fill(taskItem.getPriorityColor().opacity(0.1))
+                                .stroke(taskItem.getPriorityColor(), lineWidth: 2)
+                                .clipShape(RoundedRectangle(cornerRadius: 5))
+                        )
                 }
             }
             
@@ -274,14 +302,16 @@ struct DetailsView: View {
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color(uiColor: .secondarySystemBackground))
+//                .stroke(Color(hex: projectItem.projectColor), lineWidth: 2)
         )
         .padding(.horizontal)
         
         .onTapGesture {
-            withAnimation (.snappy(duration: 0.3, extraBounce: 0.2)) {
-                viewModel.setSelectedTask(taskItem)
-                viewModel.addingTask = true
+            if (viewModel.isEditing) {
+
             }
+            
+            showTaskEntry(task: taskItem)
         }
     }
     
@@ -292,7 +322,7 @@ struct DetailsView: View {
                 .fill(Color(uiColor: .secondarySystemBackground))
             
             VStack (alignment: .center, spacing: 10) {
-                Spacer() 
+                Spacer()
                 Image(systemName: "tray.circle.fill")
                     .resizable()
                     .frame(width: 50, height: 50)
@@ -308,7 +338,7 @@ struct DetailsView: View {
     
     @ViewBuilder
     func taskListView() -> some View {
-        ForEach(projectItem.ProjectTasks, id: \.id){task in
+        ForEach(projectItem.ProjectTasks, id: \.id) {task in
             projectTasksUpdated(task)
                 .opacity(projectItem.isArchived ? 0.7 : 1)
                 .disabled(projectItem.isArchived)
@@ -327,9 +357,9 @@ struct DetailView_Previews: PreviewProvider {
         let newTag4 = Tag(name: "User study")
         
         let newTask = Task(title: "Design task view", desc: "Test some things and write some test cases. Do some Unit testing.", tag: newTag2)
-        let newTask1 = Task(title: "Design task view", tag: newTag1)
+        let newTask1 = Task(title: "Design something", tag: newTag1, priority: .High)
         
-        let newProject = Project(projectName: "Fini", projectColor: "#1E90FF", projectTasks: [])
+        let newProject = Project(projectName: "Fini", projectColor: "#1E90FF", projectTasks: [newTask, newTask1])
         
         container.mainContext.insert(newTag1)
         container.mainContext.insert(newTag2)

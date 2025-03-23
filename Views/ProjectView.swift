@@ -16,9 +16,9 @@ struct ProjectView: View {
         NavigationStack {
             ZStack (alignment: .bottomTrailing) {
                 
-                Color.black
+                Color.primary
                     .ignoresSafeArea(.all)
-                    .opacity(showingEntry ? 0.2 : 0)
+                    .opacity(showingEntry ? 0.25 : 0)
                     .zIndex(1)
                     .onTapGesture {
                         withAnimation {
@@ -63,10 +63,9 @@ struct ProjectView: View {
                 }
                 
                 if (showingEntry) {
-                    NewProjectEntry()
+                    NewProjectEntry(color: accentColorManager.accentColor)
                         .frame(width: .infinity, height: 300, alignment: .center)
-                        .transition(.scale(scale: 0.1).animation(.snappy(duration: 0.4)).combined(with: .opacity))
-                        .zIndex(1)
+                        .zIndex(2)
                 }
             }
             
@@ -136,11 +135,13 @@ struct ProjectView: View {
         
         .tint(accentColorManager.accentColor)
         .swipeActions(edge: .trailing) {
-            Button {
+            Button (role: .destructive) {
                 context.delete(projectItem)
             } label: {
-                Image(systemName: "x.square.fill")
+                Label("Delete", systemImage: "trash.fill")
             }
+            
+            .tint(.red)
         }
     }
 }
@@ -162,6 +163,8 @@ struct ProjectView_Previews: PreviewProvider {
         container.mainContext.insert(project2)
         container.mainContext.insert(project3)
         container.mainContext.insert(project4)
+        
+        container.deleteAllData()
         
         return ProjectView()
             .modelContainer(container)

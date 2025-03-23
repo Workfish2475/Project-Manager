@@ -1,6 +1,5 @@
 import SwiftUI
 
-
 struct ContentView: View {
     @State private var selectedItem: Int = 0
     
@@ -34,6 +33,7 @@ struct ContentView: View {
             }
             
             .tint(accentColorManager.accentColor)
+            .preferredColorScheme(appearance.colorScheme)
         }
     }
 }

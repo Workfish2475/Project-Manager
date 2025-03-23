@@ -9,6 +9,7 @@ class DetailsViewModel: ObservableObject {
     @Published var deletingTasks: Bool = false
     @Published var changingColor: Bool = false
     @Published var selectedTask: Task? = nil
+    @Published var taskForDel: Set<Task> = []
     
     func setProject(_ projectItem: Project) -> Void {
         self.projectItem = projectItem
@@ -31,6 +32,14 @@ class DetailsViewModel: ObservableObject {
         return projectItem.ProjectTasks.removeAll {
             $0.id == taskItem.id
         }
+    }
+    
+    func selectForDel() -> Void {
+        
+    }
+    
+    func unselectForDel() -> Void {
+        
     }
 }
 

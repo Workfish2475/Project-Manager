@@ -6,11 +6,10 @@ struct ArchivedProjectsView: View {
     @Query(filter: Project.getArchivedProjects()) var projects: [Project]
     
     var body: some View {
-        
         NavigationStack {
             if (projects.isEmpty) {
                 emptyView()
-                    .navigationTitle("Archived projects")
+                    .navigationTitle("Archived")
                     .navigationBarTitleDisplayMode(.large)
             } else {
                 listView()

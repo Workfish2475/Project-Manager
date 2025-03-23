@@ -41,10 +41,6 @@ struct TagPickerView: View {
                             .disabled(tagItems.isEmpty)
                         }
                     }
-                
-                if !addingTag {
-                    addButton()
-                }
             }
         }   
         
@@ -84,116 +80,76 @@ struct TagPickerView: View {
                     .padding(.bottom, 10)
                     .hidden()
                 
-                ForEach(tagItems, id: \.id) {tag in
-                    tagItem(tag)
-                        .swipeActions(edge: .trailing) {
-                            Button (role: .destructive) {
-                                
-                            } label: {
-                                Image(systemName: "x.square.fill")
-                            }
-                        }
+                FlowLayout(spacing: 5, alignment: .center) {
+                    ForEach(tagItems, id: \.id) { tag in
+                        tagItem(tag)
+                    }
+                    
+                    if (addingTag) {
+                        tagItemEntry()
+                            .matchedGeometryEffect(id: "addTag", in: animation)
+                    }
+                    
+                    //Placeholder goes here
+                    tagItemPlaceholder()
                 }
                 
-                if (addingTag) {
-                    tagItemEntry()
-                        .matchedGeometryEffect(id: "addTag", in: animation)
-                }
+                .padding()
             }
         }
     }
     
     @ViewBuilder
     func tagItem(_ tag: Tag) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 10)
-                .fill(accentColorManager.accentColor)
-            HStack {
-                if isEditing {
-                    Image(systemName: "minus.circle.fill")
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(.white)
-                        .transition(.scale)
-                        .onTapGesture {
-                            context.delete(tag)
-                        }
-                }
-
-                Text(tag.name)
-                    .font(.headline.bold())
-                    .foregroundStyle(.white)
-                Spacer()
-            }
-            .padding()
-        }
-        .padding(.horizontal)
+        Text(tag.name)
+            .font(.headline)
+            .foregroundStyle(.white)
+            .padding(.horizontal)
+            .padding(.vertical, 10)
+            .fontDesign(.rounded)
+            .background(
+                Capsule()
+                    .fill(accentColorManager.accentColor)
+            )
     }
     
+    @ViewBuilder
+    func tagItemPlaceholder() -> some View {
+        Label("New", systemImage: "plus")
+            .font(.headline)
+            .foregroundStyle(accentColorManager.accentColor)
+            .padding(.horizontal)
+            .padding(.vertical, 10)
+            .fontDesign(.rounded)
+            .background(
+                Capsule()
+                    .fill(accentColorManager.accentColor.opacity(0.4))
+                    .stroke(accentColorManager.accentColor, lineWidth: 2)
+            )
+        
+            .onTapGesture {
+                withAnimation (.spring) {
+                    addingTag.toggle()
+                }
+                
+                tagField.toggle()
+            }
+    }
+    
+    //Need to take into account the max amount of chars for tag.
     @ViewBuilder
     func tagItemEntry() -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 10)
-                .fill(accentColorManager.accentColor)
-            HStack {
-                Image(systemName: "x.circle.fill")
-                    .symbolRenderingMode(.multicolor)
-                    .foregroundStyle(.red)
-                    .fontWeight(.bold)
-                    .onTapGesture {
-                        withAnimation(.smooth(duration: 0.3)) {
-                            addingTag = false
-                        }
-                    }
-                
-                TextField("Task entry" , text: $tagName)
-                    .font(.title3.bold())
-                    .foregroundStyle(.white)
-                    .tint(.white)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        saveTag()
-                    }
-                
-                Spacer()
-                
-                if !(tagName.isEmpty) {
-                    Button {
-                        tagName.removeAll()
-                    } label: {
-                        Image(systemName: "x.circle.fill")
-                            .symbolRenderingMode(.hierarchical)
-                            .padding(.trailing)
-                            .foregroundStyle(.white.opacity(0.5))
-                    }
-                    
-                    .transition(.opacity)
-                }
-            }
-            
-            .padding()
-        }
-        
-        .padding(.horizontal)
-        .frame(height: 50)
-    }
-    
-    @ViewBuilder
-    func addButton() -> some View {
-        Button {
-            withAnimation(.bouncy(duration: 0.4)) {
-                addingTag = true
-            }           
-            
-            tagField = true
-        } label: {
-            Label("Add tag", systemImage: "tag.fill")
-                .fontWeight(.medium)
-        }
-        
-        .matchedGeometryEffect(id: "addTag", in: animation)
-        .tint(accentColorManager.accentColor)
-        .buttonStyle(BorderedProminentButtonStyle())
-        .padding()
+        TextField("Tag", text: $tagName)
+            .font(.headline)
+            .foregroundStyle(.white)
+            .padding(.horizontal)
+            .padding(.vertical, 10)
+            .fontDesign(.rounded)
+            .focused($tagField)
+            .background(
+                Capsule()
+                    .fill(accentColorManager.accentColor)
+            )
     }
     
     func saveTag() {
@@ -221,15 +177,16 @@ struct ContentView_Previews: PreviewProvider {
         let container = try! ModelContainer(for: Tag.self, configurations: config)
         
         let newTag1 = Tag(name: "Testing")
-        let newTag2 = Tag(name: "Testing")
-        let newTag3 = Tag(name: "Testing")
-        let newTag4 = Tag(name: "Testing")
+        let newTag2 = Tag(name: "Backend")
+        let newTag3 = Tag(name: "UX")
+        let newTag4 = Tag(name: "User studies")
+        let newTag5 = Tag(name: "Pricing")
         
         container.mainContext.insert(newTag1)
         container.mainContext.insert(newTag2)
         container.mainContext.insert(newTag3)
         container.mainContext.insert(newTag4)
-        
+        container.mainContext.insert(newTag5)
         
         return TagPickerView()
             .modelContainer(container)

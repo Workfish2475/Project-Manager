@@ -19,7 +19,6 @@ class DetailsEntryModel: ObservableObject {
     
     @Query var tags: [Tag]
 
-    //TODO: Look over this to make sure this is good before pushing.
     func resetState() -> Void {
         addingDesc = false
         taskItemTitle.removeAll()
@@ -35,12 +34,19 @@ class DetailsEntryModel: ObservableObject {
     
     func setTaskItem(_ taskItem: Task) -> Void {
         self.taskItem = taskItem
-        
         self.taskItemTitle = self.taskItem!.title
         self.taskItemDesc = self.taskItem!.desc
         self.tag = self.taskItem!.tag
         self.status = self.taskItem!.status
         self.priority = self.taskItem!.priority
+    }
+    
+    func setTaskItemBinding(_ taskItem: Task) -> Void {
+        self.taskItemTitle = taskItem.title
+        self.taskItemDesc = taskItem.desc
+        self.tag = taskItem.tag
+        self.status = taskItem.status
+        self.priority = taskItem.priority
     }
     
     func addTaskToProject(_ task: Task) -> Void {

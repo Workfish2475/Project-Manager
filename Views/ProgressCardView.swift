@@ -65,26 +65,22 @@ struct ProgressCardView: View {
                 Text(String(describing: currentStatus))
                     .font(.title2.bold())
                     .fontDesign(.rounded)
-                
                 Spacer()
-                
                 Text("\(projectItems.count)")
                     .font(.title3.bold())
                     .fontDesign(.rounded)
             }
-            
             .padding()
             
             ScrollView (.vertical) {
                 ForEach(projectItems, id: \.id) {task in
                     taskItemView(taskItem: task)
                         .padding(.horizontal)
-                        .frame(minHeight: 100)
+                        .frame(minHeight: 50)
                         .onTapGesture {
                             selectedTask = task
                         }
                 }
-                
                 Spacer()
             }
             
@@ -104,86 +100,77 @@ struct ProgressCardView: View {
                 taskItem.isCompleted.toggle()
             } label: {
                 Image(systemName: taskItem.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color(hex: taskItem.project!.projectColor))
                     .symbolEffect(.bounce, value: taskItem.isCompleted)
             }
             
             VStack (alignment: .leading) {
                 Text(taskItem.title)
                     .font(.headline.bold())
-                    .foregroundStyle(.white)
                 
-                Text(taskItem.desc)
-                    .font(.subheadline)
-                    .foregroundStyle(.white)
+                Text(String(describing: taskItem.project!.projectName))
+                    .font(.caption.bold())
+                    .foregroundStyle(Color(hex: taskItem.project!.projectColor))
+                    .padding(.bottom, 5)
                 
-                HStack (spacing: 5) {
-                    if taskItem.tag != nil {
-                        Text(taskItem.tag!.name)
-                            .font(.caption.bold())
-                            .foregroundStyle(.white)
-                            .padding(7)
-                            .background {
-                                Capsule()
-                                    .fill(.thinMaterial)
-                            }
-                    }
-                    
-                    Spacer()
+                if (!taskItem.desc.isEmpty) {
+                    Text(taskItem.desc)
+                        .font(.subheadline)
+                        .lineLimit(3)
                 }
+                
+                if (taskItem.tag != nil) {
+                    HStack (spacing: 5) {
+                        if taskItem.tag != nil {
+                            Text(taskItem.tag!.name)
+                                .font(.caption.bold())
+                                .padding(5)
+                                .foregroundStyle(Color(hex: taskItem.project!.projectColor))
+                                .background {
+                                    RoundedRectangle(cornerRadius: 5) 
+                                        .fill(Color(hex: taskItem.project!.projectColor).opacity(0.1))
+                                        .stroke(Color(hex: taskItem.project!.projectColor), lineWidth: 2)
+                                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                                }
+                        }
+                        
+                        Spacer()
+                    }
+                }    
             }
             .padding(.vertical)
             
             Spacer()
-            
-            Menu {
-                Picker("", selection: Binding(
-                    get: { taskItem.priority },
-                    set: { newValue in
-                        taskItem.priority = newValue
-                    }
-                )) {
-                    ForEach(Priority.allCases, id: \.self){priority in
-                        Text(String(describing: priority))    
-                    }
-                }
-            } label: {
-                Circle()
-                    .fill(taskItem.getPriorityColor())
-                    .frame(width: 10, height: 10)
-                    .padding()
-            }
+            Circle()
+                .fill(taskItem.getPriorityColor())
+                .frame(width: 10, height: 10)
+                .padding()
         }
         
         .padding(.leading)
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(accentColorManager.accentColor)
+                .fill(Color(uiColor: .systemBackground))
         )
     }
 }
 
 struct ProjCardView_Previews: PreviewProvider {
     static var previews: some View {
-        // Configure an in-memory-only model container for testing
-        let config = ModelConfiguration(isStoredInMemoryOnly: false)
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: Tag.self, Task.self, Project.self, configurations: config)
         
-        // Create unique tags
         let tag1 = Tag(name: "Testing")
         let tag2 = Tag(name: "UI")
         let tag3 = Tag(name: "Backend")
         let tag4 = Tag(name: "User study")
         
-        // Create distinct tasks
         let task1 = Task(title: "Design UI", desc: "Make sure to get everything aligned nicely.", tag: tag2, status: .Backlog)
         let task2 = Task(title: "Debugging", tag: tag1, status: .Review)
         
-        // Create projects with different tasks
         let project1 = Project(projectName: "Project Alpha", projectColor: "#FF5733", projectTasks: [task1])
         let project2 = Project(projectName: "Project Beta", projectColor: "#33FF57", projectTasks: [task2])
         
-        // Insert data into the model container
         container.mainContext.insert(project1)
         container.mainContext.insert(project2)
         container.mainContext.insert(tag1)
@@ -193,7 +180,6 @@ struct ProjCardView_Previews: PreviewProvider {
         container.mainContext.insert(task1)
         container.mainContext.insert(task2)
         
-        // Return the view with the container and any required environment objects
         return ProjProgressView()
             .modelContainer(container)
             .environmentObject(AccentColorManager())

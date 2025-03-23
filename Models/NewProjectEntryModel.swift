@@ -21,7 +21,6 @@ class NewProjectEntryModel: ObservableObject {
         resetState()
         
         modelContext.insert(newProject)
-        
     }
     
     func changeColor(_ color: Color) -> Void {

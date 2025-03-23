@@ -1,6 +1,8 @@
 import SwiftUI
 import SwiftData
 
+//TODO: Should use a VM
+//TODO: Should save changes to the task onChange of something
 struct TaskCardView: View {
     var taskItem: Task
     
@@ -26,6 +28,22 @@ struct TaskCardView: View {
                 VStack (spacing: 0) {
                     taskTitle()
                     HStack {
+                        if (taskItem.project != nil) {
+                            Text(taskItem.project!.projectName)
+                                .font(.caption.bold())
+                                .foregroundStyle(Color(hex: taskItem.project!.projectColor))
+                            
+                            Divider()
+                                .frame(width: 2, height: 10)
+                                .overlay(
+                                    Capsule()
+                                        .fill(
+                                            Color(hex: taskItem.project!.projectColor)
+                                        )
+                                )
+                        }
+                        
+                        
                         Text(taskItem.isCompleted ? "Done" : "Pending")
                             .foregroundStyle(taskItem.isCompleted ? .green : .orange)
                             .font(.caption.bold())
@@ -195,7 +213,6 @@ struct TaskCardView: View {
                         .fill(Color(uiColor: .secondarySystemBackground))
                 )
                 .padding()
-                
                 Spacer()
             }
             
