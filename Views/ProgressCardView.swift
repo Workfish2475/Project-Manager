@@ -154,28 +154,6 @@ struct ProjCardView_Previews: PreviewProvider {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: Tag.self, Task.self, Project.self, configurations: config)
         
-//        let tag1 = Tag(name: "Testing")
-//        let tag2 = Tag(name: "UI")
-//        let tag3 = Tag(name: "Backend")
-//        let tag4 = Tag(name: "User study")
-//        
-//        let task1 = Task(title: "Design UI", desc: "Make sure to get everything aligned nicely.", tag: tag2, status: .Backlog)
-//        let task2 = Task(title: "Debugging", tag: tag1, status: .Review)
-//        
-//        let project1 = Project(projectName: "Project Alpha", projectColor: "#FF5733", projectTasks: [task1])
-//        let project2 = Project(projectName: "Project Beta", projectColor: "#33FF57", projectTasks: [task2])
-//        
-//        container.mainContext.insert(project1)
-//        container.mainContext.insert(project2)
-//        container.mainContext.insert(tag1)
-//        container.mainContext.insert(tag2)
-//        container.mainContext.insert(tag3)
-//        container.mainContext.insert(tag4)
-//        container.mainContext.insert(task1)
-//        container.mainContext.insert(task2)
-        
-        container.deleteAllData()
-        
         return ProjProgressView()
             .modelContainer(container)
             .environmentObject(AccentColorManager())

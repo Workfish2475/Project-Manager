@@ -14,10 +14,6 @@ struct Settings: View {
                     NavigationLink(destination: TagPickerView()) {
                         Label("Tags", systemImage: "tag")
                     }
-                    
-                    NavigationLink(destination: ArchivedProjectsView()) {
-                        Label("Archived", systemImage: "archivebox")
-                    }
                 }
                 
                 Section(header: Text("Appearance")) {

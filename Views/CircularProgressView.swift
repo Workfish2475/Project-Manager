@@ -3,7 +3,6 @@
 
 import SwiftUI
 
-
 struct CircularProgressView: View {
     let progress: Double
     let ringColor: Color

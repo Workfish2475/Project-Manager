@@ -12,19 +12,13 @@ struct NewProjectEntry: View {
     
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @StateObject var viewModel: NewProjectEntryModel = NewProjectEntryModel()
+    @State var viewModel: NewProjectEntryModel = NewProjectEntryModel()
     
     @State var showColorPicker: Bool = false
     
     var body: some View {
         VStack (alignment: .leading, spacing: 0) {
-            Text("New Project")
-                .font(.caption)
-                .padding([.top, .leading])
-                .foregroundStyle(Color(uiColor: .secondaryLabel))
-            
             VStack (alignment: .leading) {
-                
                 HStack {
                     TextField("Title", text: $viewModel.name)
                         .font(.headline)
@@ -35,8 +29,6 @@ struct NewProjectEntry: View {
                             dismiss()
                         }
                     
-                    
-                    
                     Circle()
                         .foregroundStyle(Color(hex: viewModel.color.getColorHex()))
                         .frame(width: 25, height: 25)
@@ -45,16 +37,12 @@ struct NewProjectEntry: View {
                         }
                     
                         .popover(isPresented: $showColorPicker, arrowEdge: .bottom) {
-                            Text("Project Color")
-                                .font(.headline)
-                                .padding(.top)
-                            
                             ScrollView (.vertical) {
                                 FlowLayout (spacing: 5) {
                                     ForEach(Color.allList, id: \.self){ color  in
                                         Circle()
                                             .foregroundStyle(Color(hex: color.getColorHex()))
-                                            .frame(width: 30, height: 30)
+                                            .frame(width: 35, height: 35)
                                             .onTapGesture {
                                                 viewModel.color = color
                                                 showColorPicker.toggle()
@@ -75,18 +63,15 @@ struct NewProjectEntry: View {
             .background(
                 Color(uiColor: .systemBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 5))
-                
             )
             .padding()
             
         }
-        
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color(uiColor: .secondarySystemBackground))
         )
         .padding()
-        
     }
 }
 

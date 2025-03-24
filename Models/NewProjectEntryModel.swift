@@ -8,9 +8,10 @@
 import SwiftUI
 import SwiftData
 
-class NewProjectEntryModel: ObservableObject {
-    @Published var name: String = ""
-    @Published var color: Color = Color.allList[0]
+@Observable
+class NewProjectEntryModel {
+    var name: String = ""
+    var color: Color = Color.allList[0]
     
     func saveProject(_ modelContext: ModelContext) -> Void {
         if (name.isEmpty) {
