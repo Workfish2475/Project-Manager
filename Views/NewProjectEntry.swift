@@ -19,8 +19,9 @@ struct NewProjectEntry: View {
     var body: some View {
         VStack (alignment: .leading, spacing: 0) {
             Text("New Project")
-                .font(.headline)
+                .font(.caption)
                 .padding([.top, .leading])
+                .foregroundStyle(Color(uiColor: .secondaryLabel))
             
             VStack (alignment: .leading) {
                 

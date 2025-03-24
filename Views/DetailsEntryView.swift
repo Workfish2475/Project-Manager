@@ -21,6 +21,7 @@ struct DetailsEntryView: View {
             VStack (alignment: .leading, spacing: 15) {
                 TextField("New task", text: $viewModel.taskItemTitle)
                     .font(.title3.bold())
+                    .submitLabel(.done)
                     .onSubmit {
                         viewModel.saveTask(modelContext)
                     }

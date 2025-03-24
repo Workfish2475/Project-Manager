@@ -1,15 +1,16 @@
 import SwiftUI
 import SwiftData
 
-class DetailsViewModel: ObservableObject {
-    @Published var projectItem: Project?
+@Observable
+class DetailsViewModel {
+    var projectItem: Project?
     
-    @Published var addingTask: Bool = false
-    @Published var isEditing: Bool = false
-    @Published var deletingTasks: Bool = false
-    @Published var changingColor: Bool = false
-    @Published var selectedTask: Task? = nil
-    @Published var taskForDel: Set<Task> = []
+    var addingTask: Bool = false
+    var isEditing: Bool = false
+    var deletingTasks: Bool = false
+    var changingColor: Bool = false
+    var selectedTask: Task? = nil
+    var taskForDel: Set<Task> = []
     
     func setProject(_ projectItem: Project) -> Void {
         self.projectItem = projectItem

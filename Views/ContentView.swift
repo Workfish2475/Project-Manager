@@ -19,21 +19,23 @@ struct ContentView: View {
     @AppStorage("appearance") var appearance: Appearance = .system
     
     var body: some View {
-        ZStack (alignment: .bottomTrailing) {
+        NavigationStack {
             TabView(selection: $selectedItem) {
                 ProjectView()
                     .tabItem {
                         Label("Projects", systemImage: "hammer.fill")
                     }
-                
+                    .tag(0)
+      
                 ProjProgressView()
                     .tabItem {
                         Label("Progress", systemImage: "chart.bar.fill")
                     }
-            }
-            
-            .tint(accentColorManager.accentColor)
-            .preferredColorScheme(appearance.colorScheme)
+                    .tag(1)
+                }
+                .tint(accentColorManager.accentColor)
+                .preferredColorScheme(appearance.colorScheme)
+                .navigationTitle(selectedItem == 0 ? "Projects" : "Progress")
         }
     }
 }

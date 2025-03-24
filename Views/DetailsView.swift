@@ -4,7 +4,7 @@ import SwiftData
 struct DetailsView: View {
     var projectItem: Project
     
-    @StateObject var viewModel: DetailsViewModel = DetailsViewModel()
+    @State var viewModel: DetailsViewModel = DetailsViewModel()
     
     @Namespace private var animation
     @EnvironmentObject var accentColorManager: AccentColorManager
@@ -31,8 +31,8 @@ struct DetailsView: View {
                 .disabled(viewModel.addingTask)
             
                 if viewModel.addingTask {
-                    Color.black
-                        .opacity(0.7)
+                    Color.primary
+                        .opacity(0.3)
                         .ignoresSafeArea(.all)
                         .transition(.opacity)
                         .onTapGesture {

@@ -1,26 +1,20 @@
 import SwiftUI
 import SwiftData
 
-//This may be triggering the re-render
-
 struct ProgressCardView: View {
     let currentStatus: Status
-    let projects: [Project]
     
     @State var selectedTask: Task? = nil
     @EnvironmentObject var accentColorManager: AccentColorManager
     
-    var projectItems: [Task] {
-        let uniqueTasks = Set(
-            projects.flatMap { project in
-                project.ProjectTasks.filter { $0.status == currentStatus }
-            }
-        )
-        return Array(uniqueTasks)
+    @Query var allTasks: [Task]
+
+    var tasks: [Task] {
+        allTasks.filter { $0.status == currentStatus }
     }
-    
+
     var body: some View {
-        if projectItems.isEmpty {
+        if tasks.isEmpty {
             emptyView()
         } else {
             listView()
@@ -66,14 +60,14 @@ struct ProgressCardView: View {
                     .font(.title2.bold())
                     .fontDesign(.rounded)
                 Spacer()
-                Text("\(projectItems.count)")
+                Text("\(tasks.count)")
                     .font(.title3.bold())
                     .fontDesign(.rounded)
             }
             .padding()
             
             ScrollView (.vertical) {
-                ForEach(projectItems, id: \.id) {task in
+                ForEach(tasks, id: \.id) {task in
                     taskItemView(taskItem: task)
                         .padding(.horizontal)
                         .frame(minHeight: 50)
@@ -160,25 +154,27 @@ struct ProjCardView_Previews: PreviewProvider {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: Tag.self, Task.self, Project.self, configurations: config)
         
-        let tag1 = Tag(name: "Testing")
-        let tag2 = Tag(name: "UI")
-        let tag3 = Tag(name: "Backend")
-        let tag4 = Tag(name: "User study")
+//        let tag1 = Tag(name: "Testing")
+//        let tag2 = Tag(name: "UI")
+//        let tag3 = Tag(name: "Backend")
+//        let tag4 = Tag(name: "User study")
+//        
+//        let task1 = Task(title: "Design UI", desc: "Make sure to get everything aligned nicely.", tag: tag2, status: .Backlog)
+//        let task2 = Task(title: "Debugging", tag: tag1, status: .Review)
+//        
+//        let project1 = Project(projectName: "Project Alpha", projectColor: "#FF5733", projectTasks: [task1])
+//        let project2 = Project(projectName: "Project Beta", projectColor: "#33FF57", projectTasks: [task2])
+//        
+//        container.mainContext.insert(project1)
+//        container.mainContext.insert(project2)
+//        container.mainContext.insert(tag1)
+//        container.mainContext.insert(tag2)
+//        container.mainContext.insert(tag3)
+//        container.mainContext.insert(tag4)
+//        container.mainContext.insert(task1)
+//        container.mainContext.insert(task2)
         
-        let task1 = Task(title: "Design UI", desc: "Make sure to get everything aligned nicely.", tag: tag2, status: .Backlog)
-        let task2 = Task(title: "Debugging", tag: tag1, status: .Review)
-        
-        let project1 = Project(projectName: "Project Alpha", projectColor: "#FF5733", projectTasks: [task1])
-        let project2 = Project(projectName: "Project Beta", projectColor: "#33FF57", projectTasks: [task2])
-        
-        container.mainContext.insert(project1)
-        container.mainContext.insert(project2)
-        container.mainContext.insert(tag1)
-        container.mainContext.insert(tag2)
-        container.mainContext.insert(tag3)
-        container.mainContext.insert(tag4)
-        container.mainContext.insert(task1)
-        container.mainContext.insert(task2)
+        container.deleteAllData()
         
         return ProjProgressView()
             .modelContainer(container)

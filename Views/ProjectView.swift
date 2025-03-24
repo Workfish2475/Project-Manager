@@ -13,15 +13,13 @@ struct ProjectView: View {
     @EnvironmentObject var accentColorManager: AccentColorManager
     
     var body: some View {
-        NavigationStack {
             ZStack (alignment: .bottomTrailing) {
-                
                 Color.primary
                     .ignoresSafeArea(.all)
                     .opacity(showingEntry ? 0.25 : 0)
                     .zIndex(1)
                     .onTapGesture {
-                        withAnimation {
+                        withAnimation (.bouncy(duration: 0.3)) {
                             showingEntry.toggle()
                         }
                     }
@@ -34,8 +32,9 @@ struct ProjectView: View {
                     .foregroundStyle(accentColorManager.accentColor)
                     .rotationEffect(showingEntry ? .degrees(45) : .zero)
                     .zIndex(2)
+                    .sensoryFeedback(.impact, trigger: showingEntry)
                     .onTapGesture {
-                        withAnimation {
+                        withAnimation (.bouncy(duration: 0.3)) {
                             showingEntry.toggle()
                         }
                     }
@@ -64,13 +63,12 @@ struct ProjectView: View {
                 
                 if (showingEntry) {
                     NewProjectEntry(color: accentColorManager.accentColor)
-                        .frame(width: .infinity, height: 300, alignment: .center)
+                        .frame(height: 300, alignment: .center)
+                        .transition(.move(edge: .bottom))
                         .zIndex(2)
                 }
             }
             
-            .navigationTitle("Projects")
-            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -92,7 +90,6 @@ struct ProjectView: View {
                     showingEntry = false
                 }
             }
-        }
     }
     
     @ViewBuilder
@@ -143,6 +140,31 @@ struct ProjectView: View {
             
             .tint(.red)
         }
+        
+//        Uncomment this only when you're trying to delete everything!
+//        .onAppear() {
+//            deleteAllData(modelContext: context)
+//        }
+    }
+    
+    func deleteAllData(modelContext: ModelContext) {
+        do {
+            let taskDescriptor = FetchDescriptor<Task>()
+            let tasks = try modelContext.fetch(taskDescriptor)
+            tasks.forEach { modelContext.delete($0) }
+
+            let projectDescriptor = FetchDescriptor<Project>()
+            let projects = try modelContext.fetch(projectDescriptor)
+            projects.forEach { modelContext.delete($0) }
+
+            let tagDescriptor = FetchDescriptor<Tag>()
+            let tags = try modelContext.fetch(tagDescriptor)
+            tags.forEach { modelContext.delete($0) }
+
+            try modelContext.save()
+        } catch {
+            print("Error deleting all data: \(error)")
+        }
     }
 }
 
@@ -163,8 +185,6 @@ struct ProjectView_Previews: PreviewProvider {
         container.mainContext.insert(project2)
         container.mainContext.insert(project3)
         container.mainContext.insert(project4)
-        
-        container.deleteAllData()
         
         return ProjectView()
             .modelContainer(container)

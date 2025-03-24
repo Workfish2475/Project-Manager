@@ -8,23 +8,7 @@ struct ProjProgressView: View {
     @EnvironmentObject var accentColorManager: AccentColorManager
     
     var body: some View {
-        NavigationStack {
-             kanban()
-                .navigationTitle("Progress")
-                .toolbar {
-                    ToolbarItem (placement: .topBarTrailing) {
-                        Button {
-                            showingSettings.toggle()
-                        } label: {
-                            Image(systemName: "gear")
-                        }
-                    }
-                }
-        }
-        
-        .sheet(isPresented: $showingSettings) {
-            Settings()
-        }
+         kanban()
     }
     
     @ViewBuilder
@@ -33,7 +17,7 @@ struct ProjProgressView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 16) {
                     ForEach(Status.allCases, id: \.self) { status in
-                        ProgressCardView(currentStatus: status, projects: projects)
+                        ProgressCardView(currentStatus: status)
                             .background(.thinMaterial)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                             .frame(width: geometry.size.width >= 768 ? 

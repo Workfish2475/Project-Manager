@@ -22,15 +22,17 @@ struct TagPickerView: View {
     @State private var tagName: String = ""
     @State private var tagColor: Color = Color.allList[0]
     
+    @State private var selectedTags: Set<Tag> = []
+    
     var body: some View {
-        ZStack {
+        ZStack (alignment: .bottom) {
             NavigationStack {
                 tagList()
                     .navigationTitle("Tags")
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button {
-                                withAnimation {
+                                withAnimation (.bouncy(duration: 0.3, extraBounce: 0.1)) {
                                     isEditing.toggle()
                                 }
                             } label: {
@@ -42,7 +44,17 @@ struct TagPickerView: View {
                         }
                     }
             }
-        }   
+            
+            if isEditing {
+                deletionTab()
+                    .transition(
+                        .asymmetric(
+                            insertion: .move(edge: .bottom),
+                            removal: .move(edge: .bottom)
+                        )
+                    )
+            }
+        }
         
         .tint(accentColorManager.accentColor)
         .onChange(of: isEditing) {
@@ -52,50 +64,40 @@ struct TagPickerView: View {
     
     @ViewBuilder
     func tagList() -> some View {
-        if tagItems.isEmpty {
-            VStack (spacing: 10) {
-                Spacer()
-                if !addingTag {
-                    Image(systemName: "tag.circle.fill")
-                        .resizable()
-                        .symbolRenderingMode(.hierarchical)
-                        .frame(width: 75, height: 75)
-                        .foregroundStyle(accentColorManager.accentColor)
+        ScrollView (.vertical) {
+            if (tagItems.isEmpty) {
+                Text("You don't have any tags created yet. Add some now.")
+                    .font(.subheadline)
+                    .foregroundStyle(Color(uiColor: .secondaryLabel))
+                    .padding()
+            }
+            
+            Divider()
+                .padding(.bottom, 10)
+                .hidden()
+            
+            FlowLayout(spacing: 5, alignment: .center) {
+                ForEach(tagItems, id: \.id) { tag in
+                    tagItem(tag)
+                        .scaleEffect(selectedTags.contains(tag) ? 0.9 : 1)
+                        .animation(.snappy(duration: 0.3), value: selectedTags.contains(tag))
+                        .disabled(isEditing)
                     
-                    Text("No tags added")
-                        .font(.title3.bold())
-                        .foregroundStyle(Color(uiColor: .secondaryLabel))
-                    
-                } else {
+                        .onTapGesture {
+                            toggleTag(tag)
+                        }
+                }
+                
+                if (addingTag) {
                     tagItemEntry()
                         .matchedGeometryEffect(id: "addTag", in: animation)
-                        .frame(height: 50)
                 }
                 
-                Spacer()
+                //Placeholder goes here
+                tagItemPlaceholder()
             }
-        } else {     
-            ScrollView (.vertical) {
-                Divider()
-                    .padding(.bottom, 10)
-                    .hidden()
-                
-                FlowLayout(spacing: 5, alignment: .center) {
-                    ForEach(tagItems, id: \.id) { tag in
-                        tagItem(tag)
-                    }
-                    
-                    if (addingTag) {
-                        tagItemEntry()
-                            .matchedGeometryEffect(id: "addTag", in: animation)
-                    }
-                    
-                    //Placeholder goes here
-                    tagItemPlaceholder()
-                }
-                
-                .padding()
-            }
+            
+            .padding()
         }
     }
     
@@ -146,10 +148,66 @@ struct TagPickerView: View {
             .padding(.vertical, 10)
             .fontDesign(.rounded)
             .focused($tagField)
+            .submitLabel(.done)
+            .onSubmit {
+                saveTag()
+            }
             .background(
                 Capsule()
                     .fill(accentColorManager.accentColor)
             )
+    }
+    
+    @ViewBuilder
+    func deletionTab() -> some View {
+        HStack (spacing: 10) {
+            Button {
+                withAnimation (.bouncy(duration: 0.3, extraBounce: 0.1)) {
+                    isEditing.toggle()
+                }
+            } label: {
+                Label("Cancel", systemImage: "xmark")
+                    .font(.headline)
+            }
+            
+            Divider()
+                .frame(height: 10)
+            
+            Text("\(selectedTags.count) selected")
+                .contentTransition(.numericText())
+                .animation(.default, value: selectedTags.count)
+                .font(.headline)
+            
+            Divider()
+                .frame(height: 10)
+            
+            Button (role: .destructive) {
+                deleteFromSelected()
+                
+                withAnimation (.bouncy(duration: 0.3, extraBounce: 0.1)) {
+                    isEditing.toggle()
+                }
+            } label: {
+                Label("Delete", systemImage: "trash.fill")
+                    .font(.headline)
+            }
+        }
+        
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(uiColor: .secondarySystemBackground))
+            
+        )
+        .padding()
+    }
+    
+    func deleteFromSelected() -> Void {
+        for tag in selectedTags {
+            context.delete(tag)
+        }
+        
+        selectedTags.removeAll()
     }
     
     func saveTag() {
@@ -169,9 +227,18 @@ struct TagPickerView: View {
             print("Error, something went wrong during saving: \(error)")
         }
     }
+    
+    func toggleTag (_ tag: Tag) -> Void {
+        if selectedTags.contains(tag) {
+            selectedTags.remove(tag)
+            return
+        }
+        
+        selectedTags.insert(tag)
+    }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct TagPickerView_Previews: PreviewProvider {
     static var previews: some View {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: Tag.self, configurations: config)
