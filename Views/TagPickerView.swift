@@ -49,6 +49,7 @@ struct TagPickerView: View {
         .tint(accentColorManager.accentColor)
         .onChange(of: viewModel.isEditing) {
             viewModel.addingTag = false
+            viewModel.selectedTags.removeAll()
         }
     }
     
@@ -176,7 +177,6 @@ struct TagPickerView: View {
             
             Button (role: .destructive) {
                 viewModel.deleteFromSelected(context)
-                
                 withAnimation (.bouncy(duration: 0.3, extraBounce: 0.1)) {
                     viewModel.isEditing.toggle()
                 }

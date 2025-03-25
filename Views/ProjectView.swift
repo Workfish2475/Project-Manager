@@ -12,11 +12,16 @@ struct ProjectView: View {
     @Namespace private var animation
     @EnvironmentObject var accentColorManager: AccentColorManager
     
+    private var backgroundColor: Color {
+        scheme == .dark ? .gray : .black
+    }
+    
     var body: some View {
             ZStack (alignment: .bottomTrailing) {
-                Color.gray
+                
+                backgroundColor
                     .ignoresSafeArea(.all)
-                    .opacity(showingEntry ? 0.25 : 0)
+                    .opacity(showingEntry ? 0.1 : 0)
                     .zIndex(1)
                     .onTapGesture {
                         withAnimation (.bouncy(duration: 0.3)) {
@@ -80,7 +85,6 @@ struct ProjectView: View {
             }
             
             .tint(accentColorManager.accentColor)
-            
             .sheet(isPresented: $showingSettings) {
                 Settings()
             }
