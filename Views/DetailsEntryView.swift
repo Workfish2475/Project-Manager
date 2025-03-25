@@ -6,6 +6,8 @@ struct DetailsEntryView: View {
     var project: Project
     var task: Task?
     
+    @Binding var isPresented: Bool
+    
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
@@ -14,7 +16,7 @@ struct DetailsEntryView: View {
     @State private var creatingTag: Bool = false
     @State private var tagName: String = ""
     
-    @StateObject var viewModel: DetailsEntryModel = DetailsEntryModel()
+    @State var viewModel: DetailsEntryModel = DetailsEntryModel()
     
     var body: some View {
         HStack (alignment: .center) {
@@ -24,6 +26,7 @@ struct DetailsEntryView: View {
                     .submitLabel(.done)
                     .onSubmit {
                         viewModel.saveTask(modelContext)
+                        dismissView()
                     }
                 
                 TextField("Description" ,text: $viewModel.taskItemDesc, axis: .vertical)
@@ -36,10 +39,10 @@ struct DetailsEntryView: View {
                     .background(
                         Color(uiColor: .secondarySystemBackground)
                     )
-                
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .onSubmit {
                         viewModel.saveTask(modelContext)
+                        dismissView()
                     }
                 
                     .scaledToFill()
@@ -50,6 +53,10 @@ struct DetailsEntryView: View {
                             Picker("", selection: $viewModel.status){
                                 ForEach(Status.allCases, id: \.self){status in
                                     Text(String(describing: status)) 
+                                }
+                                
+                                .onChange(of: viewModel.status) {
+                                    viewModel.updateStatus()
                                 }
                             }
                         } label: {
@@ -86,6 +93,10 @@ struct DetailsEntryView: View {
                                         Text(tag.name)
                                             .tag(tag)
                                     }
+                                    
+                                    .onChange(of: viewModel.tag) {
+                                        viewModel.updateTag()
+                                    }
                                 }
                             }
                             
@@ -117,9 +128,22 @@ struct DetailsEntryView: View {
                         }
                     } label: {
                         Image(systemName: "flag.fill")
-                            .frame(width: 20, height: 20)
+                            .frame(height: 20)
                             .foregroundStyle(task == nil ? .gray : task!.getPriorityColor())
                     }
+                    
+                    Button {
+                        if let task = viewModel.taskItem {
+                            viewModel.deleteTask(task, modelContext)
+                        }
+                        
+                        dismissView()
+                    } label: {
+                        Image(systemName: "trash.fill")
+                            .frame(height: 20)
+                    }
+                    
+                    .disabled(viewModel.taskItem == nil)
                 }
             }
         }
@@ -143,6 +167,12 @@ struct DetailsEntryView: View {
             if let task = task {
                 viewModel.setTaskItem(task)
             }
+        }
+    }
+    
+    private func dismissView() {
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            isPresented.toggle()
         }
     }
 }
@@ -170,7 +200,7 @@ struct DetailEntryView_Previews: PreviewProvider {
         container.mainContext.insert(newTask1)
         container.mainContext.insert(newProject)
         
-        return DetailsEntryView(project: newProject, task: newTask, viewModel: .init())
+        return DetailsEntryView(project: newProject, task: newTask, isPresented: .constant(true), viewModel: .init())
             .modelContainer(container)
             .environmentObject(AccentColorManager())
             .padding(50)

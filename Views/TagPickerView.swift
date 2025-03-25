@@ -3,13 +3,7 @@ import SwiftData
 
 struct TagPickerView: View {
     
-    //Implement a binding item here
-    //Implement viewModel here
-    @StateObject private var viewModel: TagPickerModel = TagPickerModel()
-    @FocusState private var focusTagField: Bool
-    
-    @State private var addingTag: Bool = false
-    @State private var isEditing: Bool = false
+    @State private var viewModel: TagPickerModel = TagPickerModel()
     
     @Environment(\.modelContext) private var context
     @EnvironmentObject var accentColorManager: AccentColorManager
@@ -18,11 +12,6 @@ struct TagPickerView: View {
     @Query private var tagItems: [Tag]
     
     @FocusState private var tagField
-    
-    @State private var tagName: String = ""
-    @State private var tagColor: Color = Color.allList[0]
-    
-    @State private var selectedTags: Set<Tag> = []
     
     var body: some View {
         ZStack (alignment: .bottom) {
@@ -33,19 +22,20 @@ struct TagPickerView: View {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button {
                                 withAnimation (.bouncy(duration: 0.3, extraBounce: 0.1)) {
-                                    isEditing.toggle()
+                                    viewModel.isEditing.toggle()
                                 }
                             } label: {
-                                Text(isEditing ? "Done" : "Edit")
+                                Text(viewModel.isEditing ? "Done" : "Edit")
                                     .fontWeight(.medium)
                             }
                             
                             .disabled(tagItems.isEmpty)
+                            .disabled(viewModel.addingTag)
                         }
                     }
             }
             
-            if isEditing {
+            if viewModel.isEditing {
                 deletionTab()
                     .transition(
                         .asymmetric(
@@ -57,8 +47,8 @@ struct TagPickerView: View {
         }
         
         .tint(accentColorManager.accentColor)
-        .onChange(of: isEditing) {
-            addingTag = false
+        .onChange(of: viewModel.isEditing) {
+            viewModel.addingTag = false
         }
     }
     
@@ -79,21 +69,23 @@ struct TagPickerView: View {
             FlowLayout(spacing: 5, alignment: .center) {
                 ForEach(tagItems, id: \.id) { tag in
                     tagItem(tag)
-                        .scaleEffect(selectedTags.contains(tag) ? 0.9 : 1)
-                        .animation(.snappy(duration: 0.3), value: selectedTags.contains(tag))
-                        .disabled(isEditing)
-                    
+                        .scaleEffect(viewModel.selectedTags.contains(tag) && viewModel.isEditing ? 0.9 : 1)
+                        .animation(.snappy(duration: 0.3), value: viewModel.selectedTags.contains(tag))
+                        .disabled(viewModel.isEditing)
                         .onTapGesture {
-                            toggleTag(tag)
+                            if (!viewModel.isEditing) {
+                                return
+                            }
+                            
+                            viewModel.toggleTag(tag)
                         }
                 }
                 
-                if (addingTag) {
+                if (viewModel.addingTag) {
                     tagItemEntry()
                         .matchedGeometryEffect(id: "addTag", in: animation)
                 }
                 
-                //Placeholder goes here
                 tagItemPlaceholder()
             }
             
@@ -131,26 +123,27 @@ struct TagPickerView: View {
         
             .onTapGesture {
                 withAnimation (.spring) {
-                    addingTag.toggle()
+                    viewModel.addingTag.toggle()
                 }
                 
                 tagField.toggle()
             }
     }
     
-    //Need to take into account the max amount of chars for tag.
+    //TODO: Need to take into account the max amount of chars for tag.
     @ViewBuilder
     func tagItemEntry() -> some View {
-        TextField("Tag", text: $tagName)
+        TextField("Tag", text: $viewModel.tagName)
             .font(.headline)
             .foregroundStyle(.white)
             .padding(.horizontal)
             .padding(.vertical, 10)
+            .tint(.white)
             .fontDesign(.rounded)
             .focused($tagField)
             .submitLabel(.done)
             .onSubmit {
-                saveTag()
+                viewModel.saveTag(context)
             }
             .background(
                 Capsule()
@@ -163,7 +156,7 @@ struct TagPickerView: View {
         HStack (spacing: 10) {
             Button {
                 withAnimation (.bouncy(duration: 0.3, extraBounce: 0.1)) {
-                    isEditing.toggle()
+                    viewModel.isEditing.toggle()
                 }
             } label: {
                 Label("Cancel", systemImage: "xmark")
@@ -173,19 +166,19 @@ struct TagPickerView: View {
             Divider()
                 .frame(height: 10)
             
-            Text("\(selectedTags.count) selected")
+            Text("\(viewModel.selectedTags.count) selected")
                 .contentTransition(.numericText())
-                .animation(.default, value: selectedTags.count)
+                .animation(.default, value: viewModel.selectedTags.count)
                 .font(.headline)
             
             Divider()
                 .frame(height: 10)
             
             Button (role: .destructive) {
-                deleteFromSelected()
+                viewModel.deleteFromSelected(context)
                 
                 withAnimation (.bouncy(duration: 0.3, extraBounce: 0.1)) {
-                    isEditing.toggle()
+                    viewModel.isEditing.toggle()
                 }
             } label: {
                 Label("Delete", systemImage: "trash.fill")
@@ -200,41 +193,6 @@ struct TagPickerView: View {
             
         )
         .padding()
-    }
-    
-    func deleteFromSelected() -> Void {
-        for tag in selectedTags {
-            context.delete(tag)
-        }
-        
-        selectedTags.removeAll()
-    }
-    
-    func saveTag() {
-        if tagName.isEmpty {
-            return
-        }
-        
-        let newTag = Tag(name: tagName)
-        context.insert(newTag)
-        
-        tagName.removeAll()
-        addingTag = false
-        
-        do {
-            try context.save()
-        } catch {
-            print("Error, something went wrong during saving: \(error)")
-        }
-    }
-    
-    func toggleTag (_ tag: Tag) -> Void {
-        if selectedTags.contains(tag) {
-            selectedTags.remove(tag)
-            return
-        }
-        
-        selectedTags.insert(tag)
     }
 }
 

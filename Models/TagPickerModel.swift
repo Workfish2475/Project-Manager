@@ -8,17 +8,18 @@
 import SwiftUI
 import SwiftData
 
-class TagPickerModel: ObservableObject {
+@Observable
+class TagPickerModel {
     
-    @Published var addingTag: Bool = false
-    @Published var isEditing: Bool = false
+    var addingTag: Bool = false
+    var isEditing: Bool = false
     
-    @Published var tagName: String = ""
-    @Published var tagColor: Color = Color.allList[0]
+    var tagName: String = ""
+    var tagColor: Color = Color.allList[0]
     
-    @Published var focusedTagField: Bool = false
+    var focusedTagField: Bool = false
     
-    @Query var tagItems: [Tag]
+    var selectedTags: Set<Tag> = []
     
     func saveTag(_ modelContext: ModelContext) -> Void {
         if tagName.isEmpty {
@@ -26,9 +27,15 @@ class TagPickerModel: ObservableObject {
         }
         
         let newTag = Tag(name: tagName)
-        resetState()
         
         modelContext.insert(newTag)
+        resetState()
+        
+        do {
+            try modelContext.save()
+        } catch {
+            print("Error, could not save tag: \(error)")
+        }
     }
     
     func resetState() -> Void {
@@ -37,10 +44,22 @@ class TagPickerModel: ObservableObject {
         
         isEditing = false
         addingTag = false
-        focusedTagField = false
     }
     
-    func removeTag(_ tag: Tag, _ modelContext: ModelContext) -> Void {
-        modelContext.delete(tag)
+    func deleteFromSelected(_ context: ModelContext) -> Void {
+        for tag in selectedTags {
+            context.delete(tag)
+        }
+        
+        selectedTags.removeAll()
+    }
+    
+    func toggleTag(_ tag: Tag) {
+        if selectedTags.contains(tag) {
+            selectedTags.remove(tag)
+            return
+        }
+        
+        selectedTags.insert(tag)
     }
 }

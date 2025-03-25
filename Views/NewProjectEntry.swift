@@ -20,7 +20,7 @@ struct NewProjectEntry: View {
         VStack (alignment: .leading, spacing: 0) {
             VStack (alignment: .leading) {
                 HStack {
-                    TextField("Title", text: $viewModel.name)
+                    TextField("New Project", text: $viewModel.name)
                         .font(.headline)
                         .submitLabel(.done)
                         .tint(Color(hex: viewModel.color.getColorHex()))

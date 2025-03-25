@@ -1,23 +1,22 @@
 import SwiftUI
 import SwiftData
 
-class DetailsEntryModel: ObservableObject {
+@Observable
+class DetailsEntryModel {
     var projectItem: Project?
     var taskItem: Task?
     
-    @Published var taskIsNil: Bool = false
+    var taskIsNil: Bool = false
+    var taskItemTitle: String = ""
     
-    @Published var taskItemTitle: String = ""
-    @Published var taskItemDesc: String = ""
+    var taskItemDesc: String = ""
     
-    @Published var tag: Tag? = nil
+    var tag: Tag? = nil
     
-    @Published var status: Status = .Backlog
-    @Published var priority: Priority = .None
+    var status: Status = .Backlog
+    var priority: Priority = .None
     
-    @Published var addingDesc: Bool = false
-    
-    @Query var tags: [Tag]
+    var addingDesc: Bool = false
 
     func resetState() -> Void {
         addingDesc = false
@@ -41,14 +40,6 @@ class DetailsEntryModel: ObservableObject {
         self.priority = self.taskItem!.priority
     }
     
-    func setTaskItemBinding(_ taskItem: Task) -> Void {
-        self.taskItemTitle = taskItem.title
-        self.taskItemDesc = taskItem.desc
-        self.tag = taskItem.tag
-        self.status = taskItem.status
-        self.priority = taskItem.priority
-    }
-    
     func addTaskToProject(_ task: Task) -> Void {
         guard let projectItem = projectItem else {
             print("Task item or project item is nil")
@@ -58,17 +49,23 @@ class DetailsEntryModel: ObservableObject {
         projectItem.ProjectTasks.append(task)
     }
     
-    //TODO: Look over this to make sure this is good before pushing.
-    func saveTask(_ context: ModelContext) -> Void {
-        if (taskItemTitle.isEmpty) {
-            return
+    func saveTask(_ context: ModelContext) {
+        if let existingTask = taskItem {
+            existingTask.title = taskItemTitle
+            existingTask.desc = taskItemDesc
+            existingTask.tag = tag
+            existingTask.status = status
+            existingTask.priority = priority
+        } else {
+            guard let project = projectItem, !taskItemTitle.isEmpty else { return }
+            let newTask = Task(title: taskItemTitle, desc: taskItemDesc, tag: tag, status: status, priority: priority, project: project)
+            context.insert(newTask)
         }
-        
-        let newTask = Task(title: taskItemTitle, desc: taskItemDesc, tag: tag,status: status, priority: priority, project: projectItem!)
-        context.insert(newTask)
+
+        try? context.save()
         resetState()
     }
-    
+
     func setProject() {
         guard let taskItem = taskItem, let projectItem = projectItem else {
             print("Task item or project item is nil")
@@ -84,5 +81,35 @@ class DetailsEntryModel: ObservableObject {
         }
         
         taskItem.priority = priority
+    }
+    
+    func updateStatus() -> Void {
+        guard let taskItem = taskItem else {
+            return
+        }
+        
+        taskItem.status = status
+    }
+    
+    func updateTag() -> Void {
+        guard let taskItem = taskItem else {
+            return
+        }
+        
+        taskItem.tag = tag
+    }
+    
+    func deleteTask(_ task: Task, _ context: ModelContext) {
+        if let project = task.project {
+            project.ProjectTasks.removeAll(where: { $0.id == task.id })
+        }
+        
+        context.delete(task)
+        
+        do {
+            try context.save()
+        } catch {
+            print("Error deleting task: \(error)")
+        }
     }
 }

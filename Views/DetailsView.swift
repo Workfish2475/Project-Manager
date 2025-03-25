@@ -41,7 +41,7 @@ struct DetailsView: View {
                 }
                 
                 
-                DetailsEntryView(project: projectItem, task: viewModel.selectedTask)
+                DetailsEntryView(project: projectItem, task: viewModel.selectedTask, isPresented: $viewModel.addingTask)
                     .id(viewModel.selectedTask?.id)
                     .frame(width: .infinity, height: 150, alignment: .bottom)
                     .offset(y: viewModel.addingTask ? 0 : 350)
@@ -61,15 +61,6 @@ struct DetailsView: View {
                             .font(.caption.bold())
                             .foregroundStyle(projectItem.isArchived ? .red : .green)
                     }
-                }
-                
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button (viewModel.deletingTasks ? "Done" : "Edit") {
-                        viewModel.deletingTasks.toggle()
-                    }
-                    
-                    .disabled(viewModel.addingTask)
-                    .disabled(projectItem.isArchived)
                 }
                 
                 ToolbarItem(placement: .bottomBar) {
@@ -302,7 +293,6 @@ struct DetailsView: View {
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color(uiColor: .secondarySystemBackground))
-//                .stroke(Color(hex: projectItem.projectColor), lineWidth: 2)
         )
         .padding(.horizontal)
         

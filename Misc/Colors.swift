@@ -38,7 +38,6 @@ class AccentColorManager: ObservableObject {
     @AppStorage("accentColor") var accentColor: Color = Color.allList[0]
 }
 
-// TODO: Should write test cases for this
 extension Color {
     init(hex: String) {
         let hexString = hex.hasPrefix("#") ? String(hex.dropFirst()) : hex
@@ -83,20 +82,32 @@ extension Color {
     }
     
     static let allList: [Color] = [
-        Color(hex: "#CA5310"),
-        Color(hex: "#8F250C"),
-        Color(hex: "#96031A"),
-        Color(hex: "#32CD32"),
-        Color(hex: "#FFD700"),
-        Color(hex: "#1E90FF"),
-        Color(hex: "#800080"),
-        Color(hex: "#C44E30"),
-        Color(hex: "#FE0000"),
-        Color(hex: "#FF91AF"),
-        Color(hex: "#B57EDC"),
-        Color(hex: "#BA160C"),
-        Color(hex: "#0059CF"),
-        Color(hex: "#0466C8")
+        Color(hex: "#FA7343"),  // Swift
+        Color(hex: "#3776AB"),  // Python
+        Color(hex: "#B07219"),  // Java
+        Color(hex: "#EFD81D"),  // JavaScript (toned down yellow for contrast)
+        Color(hex: "#3178C6"),  // TypeScript
+        Color(hex: "#5C8DBC"),  // C (adjusted for better contrast)
+        Color(hex: "#004482"),  // C++
+        Color(hex: "#239120"),  // C# (cool green for visibility)
+        Color(hex: "#CC342D"),  // Ruby
+        Color(hex: "#00A9D6"),  // Go (balanced teal blue)
+        Color(hex: "#D17F45"),  // Rust (warmer, more visible brown-orange)
+        Color(hex: "#A97BFF"),  // Kotlin
+        Color(hex: "#01589C"),  // Dart (muted slightly)
+        Color(hex: "#6A7DBE"),  // PHP (lighter purple-blue for contrast)
+        Color(hex: "#E44D26"),  // HTML
+        Color(hex: "#2965F1"),  // CSS
+        Color(hex: "#14557B"),  // SQL (deep but visible blue)
+        Color(hex: "#276DC3"),  // R
+        Color(hex: "#7FBF3F"),  // Shell (less neon)
+        Color(hex: "#DC322F"),  // Scala
+        Color(hex: "#525C96"),  // Perl (mid-blue purple)
+        Color(hex: "#7E6DAE"),  // Haskell
+        Color(hex: "#8E5EAA"),  // Elixir
+        Color(hex: "#2C2D72"),  // Lua (dark but vivid navy)
+        Color(hex: "#85613E"),  // Assembly (warmer brown)
+        Color(hex: "#FF3E00")   // Svelte (official vibrant orange)
     ]
 }
 

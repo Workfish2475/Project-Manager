@@ -14,7 +14,7 @@ struct ProjectView: View {
     
     var body: some View {
             ZStack (alignment: .bottomTrailing) {
-                Color.primary
+                Color.gray
                     .ignoresSafeArea(.all)
                     .opacity(showingEntry ? 0.25 : 0)
                     .zIndex(1)
