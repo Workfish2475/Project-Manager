@@ -83,17 +83,16 @@ class Task {
         }
     }
     
-    //Testing required
     func updateStatus() -> Void {
         switch self.status {
         case .Backlog:
             self.status = .Doing
         case .Doing:
-            self.status = .Done
-        case .Done: 
             self.status = .Review
         case .Review:
-            self.status = .Review
+            self.status = .Done
+        case .Done:
+            self.status = .Done
         }
     }
 }

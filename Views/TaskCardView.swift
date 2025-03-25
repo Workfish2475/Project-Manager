@@ -199,11 +199,19 @@ struct TaskCardView: View {
                     
                     Divider()
                     
-                    Button {
-                        taskItem.isCompleted.toggle()
-                    } label: {
-                        Image(systemName: taskItem.isCompleted ? "xmark" : "checkmark")
-                            .fontWeight(.bold)
+                    if (taskItem.status == .Done) {
+                        Button {
+                            taskItem.isCompleted.toggle()
+                        } label: {
+                            Image(systemName: taskItem.isCompleted ? "xmark" : "checkmark")
+                                .fontWeight(.bold)
+                        }
+                    } else {
+                        Button {
+                            taskItem.updateStatus()
+                        } label: {
+                            Image(systemName: "arrow.right")
+                        }
                     }
                 }
                 

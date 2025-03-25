@@ -231,6 +231,8 @@ struct DetailsView: View {
                 .foregroundStyle(Color(hex: projectItem.projectColor))
                 .symbolEffect(.bounce, value: taskItem.isCompleted)
                 .sensoryFeedback(.impact, trigger: taskItem.isCompleted)
+            
+                //TODO: This needs to be updated to update the status and check if status is "DONE"
                 .onTapGesture {
                     taskItem.isCompleted.toggle()
                 }

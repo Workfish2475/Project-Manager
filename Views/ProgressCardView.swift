@@ -91,7 +91,10 @@ struct ProgressCardView: View {
     func taskItemView(taskItem: Task) -> some View {
         HStack {
             Button {
-                taskItem.isCompleted.toggle()
+                if (taskItem.status == .Review || taskItem.status == .Done) {
+                    taskItem.isCompleted.toggle()
+                }
+                taskItem.updateStatus()
             } label: {
                 Image(systemName: taskItem.isCompleted ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(Color(hex: taskItem.project!.projectColor))
