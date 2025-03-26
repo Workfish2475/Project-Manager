@@ -330,10 +330,26 @@ struct DetailsView: View {
     
     @ViewBuilder
     func taskListView() -> some View {
-        ForEach(projectItem.ProjectTasks, id: \.id) {task in
-            projectTasksUpdated(task)
-                .opacity(projectItem.isArchived ? 0.7 : 1)
-                .disabled(projectItem.isArchived)
+        ForEach(Status.allCases, id: \.self) { status in
+            VStack {
+                if (!projectItem.ProjectTasks.filter { $0.status == status }.isEmpty) {
+                    HStack {
+                        Text(String(describing: status))
+                            .foregroundStyle(Color(uiColor: .secondaryLabel))
+                            .font(.caption)
+                            .fontDesign(.rounded)
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                }
+                
+                ForEach(projectItem.ProjectTasks.filter { $0.status == status }, id: \.id) { task in
+                    projectTasksUpdated(task)
+                        .opacity(projectItem.isArchived ? 0.7 : 1)
+                        .disabled(projectItem.isArchived)
+                }
+            }
         }
     }
 }

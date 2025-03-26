@@ -263,7 +263,6 @@ struct TaskCardView: View {
         HStack {
             TextField(taskItem.title, text: $titleField)
                 .font(.title.bold())
-                .fontDesign(.rounded)
                 .padding(.horizontal)
                 .submitLabel(.done)
             

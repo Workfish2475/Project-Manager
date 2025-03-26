@@ -29,16 +29,6 @@ struct Settings: View {
                 Section(header: Text("About")) {
                     Link(destination: URL(string: "https://workfish2475.github.io")!) {
                         HStack (spacing: 20) {
-                            Image(systemName: "map")
-                                .imageScale(.large)
-                            
-                            Text("Roadmap")
-                                .tint(.primary)
-                        }
-                    }
-                    
-                    Link(destination: URL(string: "https://workfish2475.github.io")!) {
-                        HStack (spacing: 20) {
                             Image(systemName: "safari")
                                 .imageScale(.large)
                             

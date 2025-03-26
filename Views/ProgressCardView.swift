@@ -8,6 +8,8 @@ struct ProgressCardView: View {
     @EnvironmentObject var accentColorManager: AccentColorManager
     
     @Query var allTasks: [Task]
+    
+    @Namespace var animation
 
     var tasks: [Task] {
         allTasks.filter { $0.status == currentStatus }
@@ -94,7 +96,10 @@ struct ProgressCardView: View {
                 if (taskItem.status == .Review || taskItem.status == .Done) {
                     taskItem.isCompleted.toggle()
                 }
-                taskItem.updateStatus()
+                
+                withAnimation (.bouncy) {
+                    taskItem.updateStatus()
+                }
             } label: {
                 Image(systemName: taskItem.isCompleted ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(Color(hex: taskItem.project!.projectColor))
@@ -149,6 +154,7 @@ struct ProgressCardView: View {
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color(uiColor: .systemBackground))
         )
+        .matchedGeometryEffect(id: "updatingStatus\(taskItem.id)", in: animation)
     }
 }
 

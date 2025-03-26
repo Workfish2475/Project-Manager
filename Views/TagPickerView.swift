@@ -40,9 +40,10 @@ struct TagPickerView: View {
                     .transition(
                         .asymmetric(
                             insertion: .move(edge: .bottom),
-                            removal: .move(edge: .bottom)
+                            removal: .move(edge: .bottom).combined(with: .opacity)
                         )
                     )
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.isEditing)
             }
         }
         
