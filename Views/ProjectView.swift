@@ -3,11 +3,14 @@ import SwiftData
 
 struct ProjectView: View {
     @Query(filter: #Predicate<Project> {!$0.isArchived}) var projects: [Project]
+    @Query(filter: #Predicate<Project> {$0.isArchived}) var archivedProjects: [Project]
+    
     @Environment(\.modelContext) private var context
     @Environment(\.colorScheme) private var scheme
     
     @State private var showingEntry: Bool = false
     @State private var showingSettings: Bool = false
+    @State private var showingArchived: Bool = false
     
     @Namespace private var animation
     @EnvironmentObject var accentColorManager: AccentColorManager
@@ -45,6 +48,17 @@ struct ProjectView: View {
                     }
                 
                 VStack {
+                    Label("Archived", systemImage: "line.3.horizontal.decrease.circle.fill")
+                        .font(.headline)
+                        .foregroundStyle(showingArchived ? accentColorManager.accentColor : accentColorManager.accentColor.opacity(0.5))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                        .onTapGesture {
+                            withAnimation {
+                                showingArchived.toggle()
+                            }
+                        }
+                    
                     if projects.isEmpty {
                         emptyProject()
                             .containerRelativeFrame(.horizontal)
@@ -59,7 +73,6 @@ struct ProjectView: View {
                             .scrollIndicators(.hidden)
                             .listRowSeparator(.hidden)
                         }
-                        
                     
                         .listStyle(.plain)
                         .tint(accentColorManager.accentColor)

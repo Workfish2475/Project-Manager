@@ -92,7 +92,7 @@ class Task {
         case .Review:
             self.status = .Done
         case .Done:
-            self.status = .Done
+            self.status = .Review
         }
     }
 }

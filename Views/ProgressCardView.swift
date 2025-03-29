@@ -93,12 +93,14 @@ struct ProgressCardView: View {
     func taskItemView(taskItem: Task) -> some View {
         HStack {
             Button {
-                if (taskItem.status == .Review || taskItem.status == .Done) {
-                    taskItem.isCompleted.toggle()
-                }
-                
                 withAnimation (.bouncy) {
                     taskItem.updateStatus()
+                }
+                
+                if (taskItem.status == .Done) {
+                    taskItem.isCompleted = true
+                } else {
+                    taskItem.isCompleted = false
                 }
             } label: {
                 Image(systemName: taskItem.isCompleted ? "checkmark.circle.fill" : "circle")

@@ -43,7 +43,8 @@ struct DetailsView: View {
                 
                 DetailsEntryView(project: projectItem, task: viewModel.selectedTask, isPresented: $viewModel.addingTask)
                     .id(viewModel.selectedTask?.id)
-                    .frame(width: .infinity, height: 150, alignment: .bottom)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 150, alignment: .bottom)
                     .offset(y: viewModel.addingTask ? 0 : 350)
                     .scaleEffect(viewModel.addingTask ? 1.0 : 0.95)
                     .opacity(viewModel.addingTask ? 1 : 0)
@@ -234,7 +235,15 @@ struct DetailsView: View {
             
                 //TODO: This needs to be updated to update the status and check if status is "DONE"
                 .onTapGesture {
-                    taskItem.isCompleted.toggle()
+                    withAnimation (.bouncy) {
+                        taskItem.updateStatus()
+                    }
+                    
+                    if (taskItem.status == .Done) {
+                        taskItem.isCompleted = true
+                    } else {
+                        taskItem.isCompleted = false
+                    }
                 }
             
             VStack (alignment: .leading) {
@@ -336,8 +345,8 @@ struct DetailsView: View {
                     HStack {
                         Text(String(describing: status))
                             .foregroundStyle(Color(uiColor: .secondaryLabel))
-                            .font(.caption)
-                            .fontDesign(.rounded)
+                            .font(.caption.bold())
+                            .padding(.top)
                         
                         Spacer()
                     }
@@ -348,6 +357,7 @@ struct DetailsView: View {
                     projectTasksUpdated(task)
                         .opacity(projectItem.isArchived ? 0.7 : 1)
                         .disabled(projectItem.isArchived)
+                        .matchedGeometryEffect(id: "updatingTask\(task.id)", in: animation)
                 }
             }
         }
@@ -364,10 +374,11 @@ struct DetailView_Previews: PreviewProvider {
         let newTag3 = Tag(name: "Bugs")
         let newTag4 = Tag(name: "User study")
         
-        let newTask = Task(title: "Design task view", desc: "Test some things and write some test cases. Do some Unit testing.", tag: newTag2)
+        let newTask = Task(title: "Design task view", desc: "Something Something Something", tag: newTag2, status: .Doing)
         let newTask1 = Task(title: "Design something", tag: newTag1, priority: .High)
+        let newTask2 = Task(title: "Design something", tag: newTag1, priority: .High)
         
-        let newProject = Project(projectName: "Fini", projectColor: "#1E90FF", projectTasks: [newTask, newTask1])
+        let newProject = Project(projectName: "Fini", projectColor: "#1E90FF", projectTasks: [newTask, newTask1, newTask2])
         
         container.mainContext.insert(newTag1)
         container.mainContext.insert(newTag2)

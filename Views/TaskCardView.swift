@@ -209,6 +209,12 @@ struct TaskCardView: View {
                     } else {
                         Button {
                             taskItem.updateStatus()
+                            
+                            if (taskItem.status == .Done) {
+                                taskItem.isCompleted = true
+                            } else {
+                                taskItem.isCompleted = false
+                            }
                         } label: {
                             Image(systemName: "arrow.right")
                         }
