@@ -63,19 +63,36 @@ struct ProjectView: View {
                         emptyProject()
                             .containerRelativeFrame(.horizontal)
                     } else {
-                        List {
-                            ForEach(projects, id: \.id) { project in
-                                NavigationLink(destination: DetailsView(projectItem: project)) {
-                                    projectItem(project)
-                                } //NavigationLink
-                            } //ForEach
-                            
-                            .scrollIndicators(.hidden)
-                            .listRowSeparator(.hidden)
+                        
+                        if (showingArchived) {
+                            List {
+                                ForEach(archivedProjects, id: \.id) { project in
+                                    NavigationLink(destination: DetailsView(projectItem: project)) {
+                                        projectItem(project)
+                                    } //NavigationLink
+                                } //ForEach
+                                
+                                .scrollIndicators(.hidden)
+                                .listRowSeparator(.hidden)
+                            }
+                        
+                            .listStyle(.plain)
+                            .tint(accentColorManager.accentColor)
+                        } else {
+                            List {
+                                ForEach(projects, id: \.id) { project in
+                                    NavigationLink(destination: DetailsView(projectItem: project)) {
+                                        projectItem(project)
+                                    } //NavigationLink
+                                } //ForEach
+                                
+                                .scrollIndicators(.hidden)
+                                .listRowSeparator(.hidden)
+                            }
+                        
+                            .listStyle(.plain)
+                            .tint(accentColorManager.accentColor)
                         }
-                    
-                        .listStyle(.plain)
-                        .tint(accentColorManager.accentColor)
                     }
                 }
                 

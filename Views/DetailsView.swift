@@ -244,6 +244,8 @@ struct DetailsView: View {
                     } else {
                         taskItem.isCompleted = false
                     }
+                    
+                    taskItem.lastUpdated = .now
                 }
             
             VStack (alignment: .leading) {

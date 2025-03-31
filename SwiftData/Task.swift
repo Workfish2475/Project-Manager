@@ -10,6 +10,7 @@ class Task {
     var isCompleted: Bool
     var status: Status
     var priority: Priority
+    var lastUpdated: Date
     @Relationship(inverse: \Project.ProjectTasks) var project: Project?
     
     init (
@@ -20,6 +21,7 @@ class Task {
         isCompleted: Bool = false,
         status: Status = .Backlog,
         priority: Priority = .None,
+        lastUpdated: Date = .now,
         project: Project? = nil
     ){
         self.id = id
@@ -29,6 +31,7 @@ class Task {
         self.isCompleted = isCompleted
         self.status = status
         self.priority = priority
+        self.lastUpdated = lastUpdated
         self.project = project
     }
     

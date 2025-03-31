@@ -12,7 +12,11 @@ struct ProgressCardView: View {
     @Namespace var animation
 
     var tasks: [Task] {
-        allTasks.filter { $0.status == currentStatus }
+        if (currentStatus == .Done) {
+            allTasks.filter { $0.status == currentStatus && Calendar.current.isDateInToday($0.lastUpdated) }
+        } else {
+            allTasks.filter { $0.status == currentStatus }
+        }
     }
 
     var body: some View {
@@ -102,6 +106,8 @@ struct ProgressCardView: View {
                 } else {
                     taskItem.isCompleted = false
                 }
+                
+                taskItem.lastUpdated = .now
             } label: {
                 Image(systemName: taskItem.isCompleted ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(Color(hex: taskItem.project!.projectColor))
@@ -164,6 +170,16 @@ struct ProjCardView_Previews: PreviewProvider {
     static var previews: some View {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: Tag.self, Task.self, Project.self, configurations: config)
+        
+        let newProject = Project(projectName: "Fini", projectColor: "#b456fs")
+        
+        let newTask1 = Task(title: "Do Something", isCompleted: true, status: .Done, lastUpdated: .now)
+        let newTask2 = Task(title: "Do Something else", isCompleted: true, status: .Done, lastUpdated: .now)
+        
+        newProject.ProjectTasks.append(newTask1)
+        newProject.ProjectTasks.append(newTask2)
+        
+        container.mainContext.insert(newProject)
         
         return ProjProgressView()
             .modelContainer(container)
