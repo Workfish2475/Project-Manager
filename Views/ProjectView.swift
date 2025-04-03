@@ -59,6 +59,7 @@ struct ProjectView: View {
                             }
                         }
                     
+                    //TODO: This needs to be simplified a LOT more.
                     if projects.isEmpty {
                         emptyProject()
                             .containerRelativeFrame(.horizontal)

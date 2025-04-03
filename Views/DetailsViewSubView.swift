@@ -14,8 +14,15 @@ struct DetailsViewSubView: View {
                 projectTitleSection()
                 
                 Section {
-                    sectionItem("Pending", .orange, projectItem.uncompletedTaskCount())
-                    sectionItem("Completed", .green, projectItem.completedTaskCount())
+                    NavigationLink(destination: BackLogView(projectItem: projectItem)) {
+                        sectionItem("Backlog", .gray, projectItem.ProjectTasks.filter { $0.status == .Backlog} .count)
+                    }
+                    
+                    sectionItem("In Progress", .orange, projectItem.uncompletedTaskCount())
+                    
+                    NavigationLink(destination: DoneView(projectItem: projectItem)) {
+                        sectionItem("Done", .green, projectItem.ProjectTasks.filter { $0.status == .Done} .count)
+                    }
                 }
                 
                 Section {
@@ -101,6 +108,78 @@ struct DetailsViewSubView: View {
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundStyle(Color(uiColor: .secondaryLabel))
+            }
+        }
+    }
+}
+
+struct sectionItemView: View {
+    var title: String = ""
+    var color: Color
+    
+    var body: some View {
+        VStack (alignment: .leading) {
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(color)
+        }
+    }
+}
+
+struct BackLogView : View {
+    
+    var projectItem: Project
+    
+    var tasks: [Task] {
+        projectItem.ProjectTasks.filter { $0.status == .Backlog }
+    }
+    
+    var body: some View {
+        List {
+            titleView(title: "Backlog", count: tasks.count)
+            
+            Section {
+                ForEach(tasks, id: \.id){ task in
+                    sectionItemView(title: task.title, color: .accentColor)
+                }
+            }
+        }
+    }
+}
+
+struct titleView: View {
+    var title: String
+    var count: Int
+    
+    var body: some View {
+        VStack (alignment: .leading) {
+            Text("\(title)")
+                .font(.title3)
+                .fontWeight(.medium)
+            
+            Text("\(count) tasks")
+                .foregroundStyle(Color(uiColor: .secondaryLabel))
+                .font(.subheadline.bold())
+        }
+    }
+}
+
+struct DoneView: View {
+    
+    var projectItem: Project
+    
+    var tasks: [Task] {
+        projectItem.ProjectTasks.filter { $0.status == .Done }
+    }
+    
+    var body: some View {
+        List {
+            titleView(title: "Done", count: tasks.count)
+            
+            Section {
+                ForEach(tasks, id: \.id){ task in
+                    sectionItemView(title: task.title, color: .accentColor)
+                }
             }
         }
     }
