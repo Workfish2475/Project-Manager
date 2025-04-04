@@ -57,6 +57,8 @@ struct DetailsViewSubView: View {
                 }
             } 
         }
+        
+        .tint(Color(hex: projectItem.projectColor))
     }
     
     @ViewBuilder

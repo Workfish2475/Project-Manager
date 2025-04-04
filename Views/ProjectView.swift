@@ -21,7 +21,6 @@ struct ProjectView: View {
     
     var body: some View {
             ZStack (alignment: .bottomTrailing) {
-                
                 backgroundColor
                     .ignoresSafeArea(.all)
                     .opacity(showingEntry ? 0.1 : 0)
@@ -59,41 +58,13 @@ struct ProjectView: View {
                             }
                         }
                     
-                    //TODO: This needs to be simplified a LOT more.
-                    if projects.isEmpty {
+                    let currentProjects = showingArchived ? archivedProjects : projects
+                    
+                    if currentProjects.isEmpty {
                         emptyProject()
                             .containerRelativeFrame(.horizontal)
                     } else {
-                        
-                        if (showingArchived) {
-                            List {
-                                ForEach(archivedProjects, id: \.id) { project in
-                                    NavigationLink(destination: DetailsView(projectItem: project)) {
-                                        projectItem(project)
-                                    } //NavigationLink
-                                } //ForEach
-                                
-                                .scrollIndicators(.hidden)
-                                .listRowSeparator(.hidden)
-                            }
-                        
-                            .listStyle(.plain)
-                            .tint(accentColorManager.accentColor)
-                        } else {
-                            List {
-                                ForEach(projects, id: \.id) { project in
-                                    NavigationLink(destination: DetailsView(projectItem: project)) {
-                                        projectItem(project)
-                                    } //NavigationLink
-                                } //ForEach
-                                
-                                .scrollIndicators(.hidden)
-                                .listRowSeparator(.hidden)
-                            }
-                        
-                            .listStyle(.plain)
-                            .tint(accentColorManager.accentColor)
-                        }
+                        projectLinks(currentProjects)
                     }
                 }
                 
@@ -127,7 +98,6 @@ struct ProjectView: View {
             }
     }
     
-    @ViewBuilder
     func emptyProject() -> some View {
         VStack(alignment: .center, spacing: 10) {
             Spacer()
@@ -138,7 +108,7 @@ struct ProjectView: View {
                 .frame(width:75, height: 75)
                 .foregroundStyle(accentColorManager.accentColor)
             
-            Text("No projects have been added")
+            Text("No projects found")
                 .font(.headline.bold())
                 .foregroundStyle(Color(uiColor: .secondaryLabel))
             
@@ -146,7 +116,22 @@ struct ProjectView: View {
         }
     }
     
-    @ViewBuilder
+    func projectLinks(_ projects: [Project]) -> some View {
+        List {
+            ForEach(projects, id: \.id){ project in
+                NavigationLink(destination: DetailsView(projectItem: project)) {
+                    projectItem(project)
+                }
+            }
+            
+            .scrollIndicators(.hidden)
+            .listRowSeparator(.hidden)
+        }
+        
+        .listStyle(.plain)
+        .tint(accentColorManager.accentColor)
+    }
+
     func projectItem(_ projectItem: Project) -> some View {
         VStack (alignment: .leading, spacing: 5) {
             Text("\(projectItem.projectName)")

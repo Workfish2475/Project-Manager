@@ -57,16 +57,10 @@ struct TagPickerView: View {
     @ViewBuilder
     func tagList() -> some View {
         ScrollView (.vertical) {
-            if (tagItems.isEmpty) {
-                Text("You don't have any tags created yet. Add some now.")
-                    .font(.subheadline)
-                    .foregroundStyle(Color(uiColor: .secondaryLabel))
-                    .padding()
-            }
-            
             Divider()
-                .padding(.bottom, 10)
                 .hidden()
+            
+            Spacer()
             
             FlowLayout(spacing: 5, alignment: .center) {
                 ForEach(tagItems, id: \.id) { tag in
@@ -95,7 +89,6 @@ struct TagPickerView: View {
         }
     }
     
-    @ViewBuilder
     func tagItem(_ tag: Tag) -> some View {
         Text(tag.name)
             .font(.headline)
@@ -109,7 +102,6 @@ struct TagPickerView: View {
             )
     }
     
-    @ViewBuilder
     func tagItemPlaceholder() -> some View {
         Label("New", systemImage: "plus")
             .font(.headline)
@@ -132,8 +124,6 @@ struct TagPickerView: View {
             }
     }
     
-    //TODO: Need to take into account the max amount of chars for tag.
-    @ViewBuilder
     func tagItemEntry() -> some View {
         TextField("Tag", text: $viewModel.tagName)
             .font(.headline)
@@ -202,17 +192,17 @@ struct TagPickerView_Previews: PreviewProvider {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: Tag.self, configurations: config)
         
-        let newTag1 = Tag(name: "Testing")
-        let newTag2 = Tag(name: "Backend")
-        let newTag3 = Tag(name: "UX")
-        let newTag4 = Tag(name: "User studies")
-        let newTag5 = Tag(name: "Pricing")
-        
-        container.mainContext.insert(newTag1)
-        container.mainContext.insert(newTag2)
-        container.mainContext.insert(newTag3)
-        container.mainContext.insert(newTag4)
-        container.mainContext.insert(newTag5)
+//        let newTag1 = Tag(name: "Testing")
+//        let newTag2 = Tag(name: "Backend")
+//        let newTag3 = Tag(name: "UX")
+//        let newTag4 = Tag(name: "User studies")
+//        let newTag5 = Tag(name: "Pricing")
+//        
+//        container.mainContext.insert(newTag1)
+//        container.mainContext.insert(newTag2)
+//        container.mainContext.insert(newTag3)
+//        container.mainContext.insert(newTag4)
+//        container.mainContext.insert(newTag5)
         
         return TagPickerView()
             .modelContainer(container)
