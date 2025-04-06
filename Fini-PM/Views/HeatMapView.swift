@@ -22,12 +22,7 @@ struct HeatMapView: View {
             ForEach(1...numOfDays, id: \.self) { day in
                 RoundedRectangle(cornerRadius: 5)
                     .frame(width: 30, height: 30)
-                    .foregroundColor(projectColor.opacity(0.5))
-                    .overlay (
-                        Text("\(day)")
-                            .font(.headline)
-                            .foregroundStyle(day == today ? .gray : .white)
-                    )
+                    .foregroundColor(projectColor)
             }
         }
         

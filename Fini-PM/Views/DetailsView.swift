@@ -280,17 +280,7 @@ struct DetailsView: View {
                 
                 HStack {
                     HStack (spacing: 0) {
-                        Text(String(describing: taskItem.status))
-                            .font(.caption.bold())
-                            .padding(5)
-                            .foregroundStyle(Color(hex: projectItem.projectColor)) 
-                        
                         if (taskItem.tag != nil) {
-                            Divider()
-                                .frame(width: 2, height: 10)
-                                .overlay(Color(hex: projectItem.projectColor))
-                                .clipShape(Capsule())
-                            
                             Text(String(describing: taskItem.tag!.name))
                                 .font(.caption.bold())
                                 .foregroundStyle(Color(hex: projectItem.projectColor))
@@ -303,7 +293,7 @@ struct DetailsView: View {
                             .fill(Color(hex: projectItem.projectColor).opacity(0.1))
                             .stroke(Color(hex: projectItem.projectColor), lineWidth: 2)
                             .clipShape(RoundedRectangle(cornerRadius: 5))
-                    ) 
+                    )
                     
                     Label(String(describing: taskItem.priority), systemImage: taskItem.getPriorityImage())
                         .font(.caption.bold())
