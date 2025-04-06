@@ -11,6 +11,7 @@ class DetailsViewModel {
     var changingColor: Bool = false
     var selectedTask: Task? = nil
     var taskForDel: Set<Task> = []
+    var selected: Int = 0
     
     func setProject(_ projectItem: Project) -> Void {
         self.projectItem = projectItem

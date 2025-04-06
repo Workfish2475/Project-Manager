@@ -1,6 +1,10 @@
 import SwiftUI
 
+//TODO: Need to finish implementing a heatmap depending on what day the tasks are completed.
 struct HeatMapView: View {
+    
+    var projectColor: Color
+    var projectTasks: [Task]
     
     var numOfDays: Int {
         return Calendar.current.range(of: .day, in: .month, for: .now)!.count
@@ -13,25 +17,26 @@ struct HeatMapView: View {
     
     let columns: [GridItem] = Array(repeating: GridItem(.flexible()), count: 7)
     
-    //TODO: Something about fetching each task that was completed on that day.
-    
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns) {
-                ForEach(1...numOfDays, id: \.self) { day in
-                    RoundedRectangle(cornerRadius: 10)
-                        .frame(width: 50, height: 50)
-                        .foregroundColor(day == today ? .red : .blue)
-                        .overlay (
-                            Text("\(day)")
-                                .font(.headline)
-                                .foregroundStyle(.white)
-                        )
-                }
+        FlowLayout (spacing: 7) {
+            ForEach(1...numOfDays, id: \.self) { day in
+                RoundedRectangle(cornerRadius: 5)
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(projectColor.opacity(0.5))
+                    .overlay (
+                        Text("\(day)")
+                            .font(.headline)
+                            .foregroundStyle(day == today ? .gray : .white)
+                    )
             }
-            
-            .padding()
         }
+        
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(uiColor: .secondarySystemBackground))
+        )
+        .padding()
     }
 }
 
@@ -46,5 +51,5 @@ struct ColorSquare: View {
 }
 
 #Preview {
-    HeatMapView()
+    HeatMapView(projectColor: .red, projectTasks: [])
 }

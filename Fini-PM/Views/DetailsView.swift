@@ -10,15 +10,20 @@ struct DetailsView: View {
     @EnvironmentObject var accentColorManager: AccentColorManager
     @AppStorage("appearance") var appearance: Appearance = .system
     @Environment(\.modelContext) private var context
+    @Environment(\.colorScheme) private var scheme
     
     @Environment(\.dismiss) private var dismiss
+    
+    private var backgroundColor: Color {
+        scheme == .dark ? .gray : .black
+    }
     
     var body: some View {
         NavigationStack {
             ZStack (alignment: .bottom) {
                 GeometryReader { geo in
                     ScrollView (.vertical) {
-                        dashBoardView()
+                        ControlView()
                         
                         if (projectItem.ProjectTasks.isEmpty) {
                             emptyView()
@@ -31,8 +36,8 @@ struct DetailsView: View {
                 .disabled(viewModel.addingTask)
             
                 if viewModel.addingTask {
-                    Color.primary
-                        .opacity(0.3)
+                    backgroundColor
+                        .opacity(viewModel.addingTask ? 0.1 : 0)
                         .ignoresSafeArea(.all)
                         .transition(.opacity)
                         .onTapGesture {
@@ -125,101 +130,117 @@ struct DetailsView: View {
         }
     }
     
-    @ViewBuilder
-    func dashBoardView() -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(uiColor: .secondarySystemBackground))
+
+    func ControlView() -> some View {
+        TabView (selection: $viewModel.selected) {
+            dashBoardView()
+                .tag(0)
             
-            HStack {
-                VStack (alignment: .leading, spacing: 10) {
-                    VStack (alignment: .leading, spacing: 0) {
-                        Text("Pending")
-                            .fontWeight(.bold)
-                            .foregroundStyle(.orange)
-                            .fontDesign(.rounded)
-                        HStack (alignment: .center) {
-                            Text(String(describing: projectItem.uncompletedTaskCount()))
-                                .fontDesign(.rounded)
-                                .fontWeight(.bold)
-                            Text("tasks")
-                                .fontWeight(.bold)
-                                .foregroundStyle(Color(uiColor: .secondaryLabel))
-                        }
-                    }
-                    
-                    VStack (alignment: .leading, spacing: 0) {
-                        Text("Completed")
-                            .fontWeight(.bold)
-                            .foregroundStyle(.green)
-                        HStack {
-                            Text(String(describing: projectItem.completedTaskCount()))
-                                .fontDesign(.rounded)
-                                .fontWeight(.bold)
-                            Text("tasks")
-                                .fontWeight(.bold)
-                                .foregroundStyle(Color(uiColor: .secondaryLabel))
-                        }
-                    }
-                    
-                    VStack (alignment: .leading) {
-                        Text("Project color")
+            HeatMapView(projectColor: Color(hex: projectItem.projectColor), projectTasks: projectItem.ProjectTasks)
+                .tag(1)
+        }
+        
+        .frame(height: 200)
+        .tabViewStyle(.page(indexDisplayMode: .never))
+    }
+    
+    
+    func dashBoardView() -> some View {
+        HStack {
+            VStack (alignment: .leading, spacing: 10) {
+                VStack (alignment: .leading, spacing: 0) {
+                    Text("Pending")
+                        .fontWeight(.bold)
+                        .foregroundStyle(.orange)
+                        .fontDesign(.rounded)
+                    HStack (alignment: .center) {
+                        Text(String(describing: projectItem.uncompletedTaskCount()))
                             .fontDesign(.rounded)
                             .fontWeight(.bold)
-                        HStack {
-                            Circle()
-                                .fill(Color(hex: projectItem.projectColor))
-                                .frame(height: 20)
-                                .onTapGesture {
-                                    withAnimation {
-                                        viewModel.changingColor.toggle()
-                                    }
-                                }
-                            
-                            if (viewModel.changingColor) {
-                                Divider()
-                                    .frame(height: 10)
-                                
-                                ScrollView (.horizontal) {
-                                    HStack {
-                                        ForEach(Color.allList, id: \.self){color in
-                                            Circle()
-                                                .fill(color)
-                                                .frame(height: 20)
-                                                .onTapGesture {
-                                                    projectItem.projectColor = color.getColorHex()
-                                                    withAnimation {
-                                                        viewModel.changingColor = false
-                                                    }
-                                                }
-                                        }
-                                    }
-                                 }
-                                
-                                .scrollIndicators(.hidden)
-                            }
-                        }
+                        Text("tasks")
+                            .fontWeight(.bold)
+                            .foregroundStyle(Color(uiColor: .secondaryLabel))
                     }
                 }
                 
-                Spacer()
-                Divider()
-                
-                VStack (spacing: 0) {
-                    CircularProgressView(progress: projectItem.progressValue(), ringColor: Color(hex: projectItem.projectColor))
-                        .frame(height: 125)
-                        .padding(.horizontal)
-                    Text("Progress")
-                        .font(.caption2)
-                        .foregroundStyle(Color(uiColor: .secondaryLabel))
+                VStack (alignment: .leading, spacing: 0) {
+                    Text("Completed")
                         .fontWeight(.bold)
+                        .foregroundStyle(.green)
+                    HStack {
+                        Text(String(describing: projectItem.completedTaskCount()))
+                            .fontDesign(.rounded)
+                            .fontWeight(.bold)
+                        Text("tasks")
+                            .fontWeight(.bold)
+                            .foregroundStyle(Color(uiColor: .secondaryLabel))
+                    }
+                }
+                
+                VStack (alignment: .leading) {
+                    Text("Project color")
+                        .fontDesign(.rounded)
+                        .fontWeight(.bold)
+                    HStack {
+                        Circle()
+                            .fill(Color(hex: projectItem.projectColor))
+                            .frame(height: 20)
+                            .onTapGesture {
+                                withAnimation {
+                                    viewModel.changingColor.toggle()
+                                }
+                            }
+                        
+                        if (viewModel.changingColor) {
+                            Divider()
+                                .frame(height: 10)
+                            
+                            ScrollView (.horizontal) {
+                                HStack {
+                                    ForEach(Color.allList, id: \.self){color in
+                                        Circle()
+                                            .fill(color)
+                                            .frame(height: 20)
+                                            .onTapGesture {
+                                                projectItem.projectColor = color.getColorHex()
+                                                withAnimation {
+                                                    viewModel.changingColor = false
+                                                }
+                                            }
+                                    }
+                                }
+                             }
+                            
+                            .scrollIndicators(.hidden)
+                        }
+                    }
                 }
             }
             
-            .padding()
+            
+            Spacer()
+            Divider()
+                .frame(height: 50)
+            
+            VStack (spacing: 0) {
+                CircularProgressView(progress: projectItem.progressValue(), ringColor: Color(hex: projectItem.projectColor))
+                    .frame(height: 125)
+                    .padding(.horizontal)
+                Text("Progress")
+                    .font(.caption2)
+                    .foregroundStyle(Color(uiColor: .secondaryLabel))
+                    .fontWeight(.bold)
+            }
         }
         
+        
         .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(uiColor: .secondarySystemBackground))
+        )
+        .padding()
+        
         .onTapGesture {
             viewModel.isEditing = true
         }
