@@ -1,28 +1,45 @@
 import SwiftUI
 
-//TODO: Need to finish implementing a heatmap depending on what day the tasks are completed.
 struct HeatMapView: View {
     
     var projectColor: Color
     var projectTasks: [Task]
     
-    var numOfDays: Int {
-        return Calendar.current.range(of: .day, in: .month, for: .now)!.count
+    var last4Weeks: [Date] {
+        var dates: [Date] = []
+        let calendar = Calendar.current
+        for day in 0...27 {
+            if let date = calendar.date(byAdding: .day, value: -day, to: Date()) {
+                dates.append(date)
+            }
+        }
+        return dates.reversed()
     }
     
-    var today: Int {
+    var dict: [Date: Int] {
+        var dict: [Date: Int] = [:]
         let calendar = Calendar.current
-        return calendar.component(.day, from: Date())
+        for date in last4Weeks {
+            let dateKey = calendar.startOfDay(for: date)
+            dict[dateKey] = projectTasks.filter { task in
+                calendar.isDate(task.lastUpdated, inSameDayAs: dateKey)
+            }.count
+        }
+        
+        return dict
     }
     
     let columns: [GridItem] = Array(repeating: GridItem(.flexible()), count: 7)
     
     var body: some View {
-        FlowLayout (spacing: 7) {
-            ForEach(1...numOfDays, id: \.self) { day in
+        LazyVGrid (columns: columns, spacing: 5) {
+            ForEach(last4Weeks, id: \.self) { day in
+                
+                let datekey = Calendar.current.startOfDay(for: day)
+                
                 RoundedRectangle(cornerRadius: 5)
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(projectColor)
+                    .frame(width: 45, height: 35)
+                    .foregroundColor(dict[datekey] == 0 ? .gray.opacity(0.7) : .green.opacity(setOpacity(dict[datekey]!)))
             }
         }
         
@@ -32,6 +49,19 @@ struct HeatMapView: View {
                 .fill(Color(uiColor: .secondarySystemBackground))
         )
         .padding()
+    }
+    
+    func setOpacity(_ value: Int) -> Double {
+        switch value {
+            case let x where x > 2:
+                return 0.7
+            case let x where x > 1:
+                return 0.5
+            case let x where x > 0:
+                return 0.3
+            default:
+                return 0.3
+        }
     }
 }
 

@@ -18,6 +18,10 @@ struct DetailsView: View {
         scheme == .dark ? .gray : .black
     }
     
+    private var completedTasks: [Task] {
+        projectItem.ProjectTasks.filter { $0.isCompleted }
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack (alignment: .bottom) {
@@ -136,7 +140,7 @@ struct DetailsView: View {
             dashBoardView()
                 .tag(0)
             
-            HeatMapView(projectColor: Color(hex: projectItem.projectColor), projectTasks: projectItem.ProjectTasks)
+            HeatMapView(projectColor: Color(hex: projectItem.projectColor), projectTasks: completedTasks)
                 .tag(1)
         }
         
@@ -279,21 +283,18 @@ struct DetailsView: View {
                 }
                 
                 HStack {
-                    HStack (spacing: 0) {
-                        if (taskItem.tag != nil) {
-                            Text(String(describing: taskItem.tag!.name))
-                                .font(.caption.bold())
-                                .foregroundStyle(Color(hex: projectItem.projectColor))
-                                .padding(5)
-                        }
+                    if (taskItem.tag != nil) {
+                        Text(String(describing: taskItem.tag!.name))
+                            .font(.caption.bold())
+                            .foregroundStyle(Color(hex: projectItem.projectColor))
+                            .padding(5)
+                            .background(
+                                RoundedRectangle(cornerRadius: 5)
+                                    .fill(Color(hex: projectItem.projectColor).opacity(0.1))
+                                    .stroke(Color(hex: projectItem.projectColor), lineWidth: 2)
+                                    .clipShape(RoundedRectangle(cornerRadius: 5))
+                            )
                     }
-                    
-                    .background(
-                        RoundedRectangle(cornerRadius: 5) 
-                            .fill(Color(hex: projectItem.projectColor).opacity(0.1))
-                            .stroke(Color(hex: projectItem.projectColor), lineWidth: 2)
-                            .clipShape(RoundedRectangle(cornerRadius: 5))
-                    )
                     
                     Label(String(describing: taskItem.priority), systemImage: taskItem.getPriorityImage())
                         .font(.caption.bold())
@@ -386,7 +387,7 @@ struct DetailView_Previews: PreviewProvider {
         let newTag4 = Tag(name: "User study")
         
         let newTask = Task(title: "Design task view", desc: "Something Something Something", tag: newTag2, status: .Doing)
-        let newTask1 = Task(title: "Design something", tag: newTag1, priority: .High)
+        let newTask1 = Task(title: "Design something", priority: .High)
         let newTask2 = Task(title: "Design something", tag: newTag1, priority: .High)
         
         let newProject = Project(projectName: "Fini", projectColor: "#1E90FF", projectTasks: [newTask, newTask1, newTask2])
