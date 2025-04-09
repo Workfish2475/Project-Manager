@@ -54,13 +54,13 @@ struct HeatMapView: View {
     func setOpacity(_ value: Int) -> Double {
         switch value {
             case let x where x > 2:
-                return 0.7
+                return 0.8
             case let x where x > 1:
-                return 0.5
+                return 0.6
             case let x where x > 0:
-                return 0.3
+                return 0.4
             default:
-                return 0.3
+                return 0.4
         }
     }
 }
