@@ -67,6 +67,7 @@ struct ProjectView: View {
                         projectLinks(currentProjects)
                     }
                 }
+                .padding(.bottom)
                 
                 if (showingEntry) {
                     NewProjectEntry(color: accentColorManager.accentColor)

@@ -21,6 +21,7 @@ struct ContentView: View {
                         Label("Projects", systemImage: "hammer.fill")
                     }
                     .tag(0)
+                    
       
                 ProjProgressView()
                     .tabItem {
