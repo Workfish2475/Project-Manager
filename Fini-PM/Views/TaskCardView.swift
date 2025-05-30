@@ -38,28 +38,37 @@ struct TaskCardView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView (.vertical) {
-                taskTitle
-                
-                Group {
-                    descSection
-                    prioritySection
-                    statusSection
-                    tagSection
+            ZStack (alignment: .bottom) {
+                ScrollView (.vertical) {
+                    taskTitle
+                    
+                    Group {
+                        descSection
+                        prioritySection
+                        statusSection
+                        tagSection
+                    }
+                   
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color(uiColor: .secondarySystemBackground))
+                    )
+                    .padding(.horizontal)
+                    
+                    controlButtons
                 }
-               
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(uiColor: .secondarySystemBackground))
-                )
-                .padding(.horizontal)
                 
-                controlButtons
+                if presentingConfirm {
+                    confirmationView
+                        .zIndex(1)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
             
+            
             .navigationBarTitleDisplayMode(.inline)
-             .toolbar {
+            .toolbar {
                  ToolbarItem(placement: .topBarTrailing) {
                      Button {
                          dismiss()
@@ -81,10 +90,62 @@ struct TaskCardView: View {
         .tint(accentColorManager.accentColor)
     }
     
+    private var confirmationView: some View {
+        VStack (spacing: 5) {
+            Group {
+                Text("Are you sure?")
+                    .font(.headline)
+                Text("This action cannot be undone.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            
+            Divider()
+                .hidden()
+            
+            HStack(spacing: 16) {
+                Button(role: .cancel) {
+                    withAnimation (.bouncy(duration: 0.3)) {
+                        presentingConfirm.toggle()
+                    }
+                } label: {
+                    Label("Cancel", systemImage: "xmark")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.secondary)
+
+                Button(role: .destructive) {
+                    // Dismiss view first
+                    dismiss()
+                    
+                    //Perform deletion by removing the task from the projectTasks then deleting from context
+                } label: {
+                    Label("Trash", systemImage: "trash.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            
+            .frame(maxWidth: .infinity)
+            .padding()
+        }
+        
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(.ultraThinMaterial)
+                .shadow(radius: 0.5)
+        )
+        .padding(.horizontal)
+    }
+    
     private var controlButtons: some View {
         HStack {
             Button (role: .destructive) {
-                presentingConfirm = true
+                withAnimation (.bouncy(duration: 0.3)) {
+                    presentingConfirm.toggle()
+                }
             } label: {
                 Image(systemName: "trash.fill")
                     .fontWeight(.bold)

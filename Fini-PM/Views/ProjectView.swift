@@ -106,7 +106,13 @@ struct ProjectView: View {
                     }
                     
                 } else {
-                    projectLinks(currentProjects)
+                    if showingGrid {
+                        projectLinksGrid(currentProjects)
+                    } else {
+                        projectLinks(currentProjects)
+                    }
+                    
+                    Spacer()
                 }
             }
             
@@ -163,7 +169,47 @@ struct ProjectView: View {
     }
     
     func projectLinksGrid(_ projects: [Project]) -> some View {
-        Text("Something")
+        LazyVGrid(columns: .init(repeating: GridItem(.flexible()), count: 2)) {
+            ForEach(projects, id: \.id) { project in
+                NavigationLink(destination: DetailsView(projectItem: project)) {
+                    
+                    //TODO: Extract this to its own view var
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(.thinMaterial)
+                        
+                        VStack {
+                            CircularProgressView(progress: project.progressValue(), ringColor: Color(hex:project.projectColor))
+                                .tint(.black)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(.ultraThinMaterial)
+                                )
+                            
+                            Text("\(project.projectName)")
+                                .font(.title3.bold())
+                                .foregroundStyle(.black)
+                        }
+                        
+                        .padding()
+                    }
+                    
+                    .contextMenu {
+                        Button (role: .destructive) {
+                            for task in project.projectTasks {
+                                context.delete(task)
+                            }
+                            
+                            context.delete(project)
+                        } label: {
+                            Label("Trash", systemImage: "trash.fill")
+                        }
+                    }
+                }
+            }
+        }
+        
+        .padding()
     }
 
     func projectItem(_ projectItem: Project) -> some View {
@@ -194,7 +240,7 @@ struct ProjectView: View {
                 context.delete(projectItem)
 
             } label: {
-                Label("Delete", systemImage: "trash.fill")
+                Label("Trash", systemImage: "trash.fill")
             }
             
             .tint(.red)
