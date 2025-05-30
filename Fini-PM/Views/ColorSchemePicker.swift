@@ -14,14 +14,10 @@ struct ColorSchemePicker: View {
                             .tag(option)
                     }
                 }
-                
                 .pickerStyle(.inline)
             }
-            
             .navigationTitle("App theme")
         }
-         
-        //attempts to force the current screen to update with new theme
         .preferredColorScheme(appearance.colorScheme == .none ? scheme : appearance.colorScheme)
     }
 }

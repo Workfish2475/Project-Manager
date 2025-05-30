@@ -11,72 +11,60 @@ struct ProjectView: View {
     @State private var showingEntry: Bool = false
     @State private var showingSettings: Bool = false
     @State private var showingArchived: Bool = false
+    @State private var showingGrid: Bool = false
     
     @Namespace private var animation
     @EnvironmentObject var accentColorManager: AccentColorManager
     
-    private var backgroundColor: Color {
-        scheme == .dark ? .gray : .black
+    private var accentColor: Color {
+        return accentColorManager.accentColor
     }
     
     var body: some View {
+        NavigationStack {
             ZStack (alignment: .bottomTrailing) {
-                backgroundColor
-                    .ignoresSafeArea(.all)
-                    .opacity(showingEntry ? 0.1 : 0)
-                    .zIndex(1)
-                    .onTapGesture {
-                        withAnimation (.bouncy(duration: 0.3)) {
-                            showingEntry.toggle()
-                        }
-                    }
+                mainContent
                 
-                Image(systemName: "plus.circle.fill")
-                    .resizable()
-                    .imageScale(.large)
-                    .frame(width: 50, height: 50)
-                    .padding()
-                    .foregroundStyle(accentColorManager.accentColor)
-                    .rotationEffect(showingEntry ? .degrees(45) : .zero)
-                    .zIndex(2)
-                    .sensoryFeedback(.impact, trigger: showingEntry)
-                    .onTapGesture {
-                        withAnimation (.bouncy(duration: 0.3)) {
-                            showingEntry.toggle()
-                        }
-                    }
-                
-                VStack {
-                    Label("Archived", systemImage: "line.3.horizontal.decrease.circle.fill")
-                        .font(.headline)
-                        .foregroundStyle(showingArchived ? accentColorManager.accentColor : accentColorManager.accentColor.opacity(0.5))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal)
+                if showingEntry {
+                    Color.clear
+                        .background(.thinMaterial)
+                        .ignoresSafeArea()
+                        .transition(.opacity)
+                        .zIndex(0)
                         .onTapGesture {
-                            withAnimation {
-                                showingArchived.toggle()
+                            withAnimation (.bouncy(duration: 0.3)) {
+                                showingEntry.toggle()
                             }
                         }
-                    
-                    let currentProjects = showingArchived ? archivedProjects : projects
-                    
-                    if currentProjects.isEmpty {
-                        emptyProject()
-                            .containerRelativeFrame(.horizontal)
-                    } else {
-                        projectLinks(currentProjects)
-                    }
                 }
-                .padding(.bottom)
                 
-                if (showingEntry) {
-                    NewProjectEntry(color: accentColorManager.accentColor)
-                        .frame(height: 300, alignment: .center)
-                        .transition(.move(edge: .bottom))
-                        .zIndex(2)
+                VStack {
+                    if showingEntry {
+                        NewProjectEntry(color: accentColor)
+                            .frame(height: 200)
+                            .padding(.horizontal)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                            .zIndex(1)
+                    }
+
+                    Image(systemName: "plus.circle.fill")
+                        .resizable()
+                        .frame(width: 50, height: 50)
+                        .padding()
+                        .foregroundStyle(accentColor)
+                        .rotationEffect(showingEntry ? .degrees(45) : .zero)
+                        .zIndex(1)
+                        .sensoryFeedback(.impact, trigger: showingEntry)
+                        .frame(maxWidth: .infinity, alignment: .bottomTrailing)
+                        .onTapGesture {
+                            withAnimation (.bouncy(duration: 0.3)) {
+                                showingEntry.toggle()
+                            }
+                        }
                 }
             }
             
+            .navigationTitle(showingEntry ? "" :"Projects")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -84,36 +72,77 @@ struct ProjectView: View {
                     } label: {
                         Image(systemName: "gear")
                     }
+                    
+                    .opacity(showingEntry ? 0 : 1)
                 }
             }
-            
-            .tint(accentColorManager.accentColor)
-            .sheet(isPresented: $showingSettings) {
-                Settings()
+        }
+        
+        .tint(accentColor)
+        .sheet(isPresented: $showingSettings) {
+            Settings()
+        }
+        
+        .onChange(of: projects) {
+            withAnimation {
+                showingEntry = false
             }
-            
-            .onChange(of: projects) {
-                withAnimation {
-                    showingEntry = false
-                }
-            }
+        }
     }
     
-    func emptyProject() -> some View {
-        VStack(alignment: .center, spacing: 10) {
-            Spacer()
+    private var mainContent: some View {
+        ScrollView (.vertical) {
+            VStack (spacing: 10) {
+                buttonsSection
+                
+                let currentProjects = showingArchived ? archivedProjects : projects
+                
+                if currentProjects.isEmpty {
+                    
+                    ContentUnavailableView {
+                        Label("No Projects", systemImage: "hammer.circle.fill")
+                    } description: {
+                        Text("Add some to get started")
+                    }
+                    
+                } else {
+                    projectLinks(currentProjects)
+                }
+            }
             
-            Image(systemName: "hammer.circle.fill")
-                .resizable()
-                .symbolRenderingMode(.hierarchical)
-                .frame(width:75, height: 75)
-                .foregroundStyle(accentColorManager.accentColor)
+            .containerRelativeFrame(.vertical)
+        }
+    }
+    
+    private var buttonsSection: some View {
+        ScrollView (.horizontal) {
+            HStack {
+                Button {
+                    withAnimation {
+                        showingGrid.toggle()
+                    }
+                } label: {
+                    Label("Grid", systemImage: "square.grid.2x2.fill")
+                        .font(.headline)
+                }
+                
+                .tint(showingGrid ? accentColor : .gray)
+                
+                Button {
+                    withAnimation {
+                        showingArchived.toggle()
+                    }
+                } label: {
+                    Label("Archived", systemImage: "line.3.horizontal.decrease.circle.fill")
+                        .font(.headline)
+                        
+                }
+                
+                .tint(showingArchived ? accentColor : .gray)
+            }
             
-            Text("No projects found")
-                .font(.headline.bold())
-                .foregroundStyle(Color(uiColor: .secondaryLabel))
-            
-            Spacer()
+            .padding(.horizontal)
+            .buttonStyle(.bordered)
         }
     }
     
@@ -130,7 +159,11 @@ struct ProjectView: View {
         }
         
         .listStyle(.plain)
-        .tint(accentColorManager.accentColor)
+        .tint(accentColor)
+    }
+    
+    func projectLinksGrid(_ projects: [Project]) -> some View {
+        Text("Something")
     }
 
     func projectItem(_ projectItem: Project) -> some View {
@@ -151,21 +184,21 @@ struct ProjectView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
         
-        .tint(accentColorManager.accentColor)
+        .tint(accentColor)
         .swipeActions(edge: .trailing) {
             Button (role: .destructive) {
+                for task in projectItem.projectTasks {
+                    context.delete(task)
+                }
+                
                 context.delete(projectItem)
+
             } label: {
                 Label("Delete", systemImage: "trash.fill")
             }
             
             .tint(.red)
         }
-        
-//        Uncomment this only when you're trying to delete everything!
-//        .onAppear() {
-//            deleteAllData(modelContext: context)
-//        }
     }
     
     func deleteAllData(modelContext: ModelContext) {
@@ -189,26 +222,11 @@ struct ProjectView: View {
     }
 }
 
-struct ProjectView_Previews: PreviewProvider {
-    static var previews: some View {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try! ModelContainer(for: Project.self, configurations: config)
-        
-        let newTask = Task(title: "testing", isCompleted: true)
-        
-        let project1 = Project(projectName: "Fini App", projectColor: "#ED2939")
-        project1.ProjectTasks.append(newTask)
-        let project2 = Project(projectName: "Personal Website", projectColor: "#32CD32")
-        let project3 = Project(projectName: "Travel Planner", projectColor: "#1E90FF")
-        let project4 = Project(projectName: "Fitness Tracker", projectColor: "#FFD700")
-        
-        container.mainContext.insert(project1)
-        container.mainContext.insert(project2)
-        container.mainContext.insert(project3)
-        container.mainContext.insert(project4)
-        
-        return ProjectView()
-            .modelContainer(container)
-            .environmentObject(AccentColorManager())
-    }
+#Preview {
+    @Previewable @StateObject var accentColor = AccentColorManager()
+    @Previewable @AppStorage("appearance") var appearance: Appearance = .system
+    
+    ProjectView()
+        .environmentObject(accentColor)
+        .modelContainer(for: [Tag.self, Project.self, Task.self])
 }

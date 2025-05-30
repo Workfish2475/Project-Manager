@@ -14,12 +14,19 @@ struct DetailsView: View {
     
     @Environment(\.dismiss) private var dismiss
     
+    init(projectItem: Project) {
+        self.projectItem = projectItem
+        let viewModel = DetailsViewModel()
+        viewModel.setProject(projectItem)
+        _viewModel = State(initialValue: viewModel)
+    }
+    
     private var backgroundColor: Color {
         scheme == .dark ? .gray : .black
     }
     
     private var completedTasks: [Task] {
-        projectItem.ProjectTasks.filter { $0.isCompleted }
+        projectItem.projectTasks.filter { $0.isCompleted }
     }
     
     var body: some View {
@@ -27,38 +34,67 @@ struct DetailsView: View {
             ZStack (alignment: .bottom) {
                 GeometryReader { geo in
                     ScrollView (.vertical) {
-                        ControlView()
-                        
-                        if (projectItem.ProjectTasks.isEmpty) {
-                            emptyView()
-                                .frame(idealHeight: geo.size.height * 0.65)
-                        } else {
-                            taskListView()
+                        VStack {
+                            ControlView
+                            
+                            Group {
+                                if (projectItem.projectTasks.isEmpty) {
+                                    emptyView
+                                } else {
+                                    taskListView
+                                }
+                            }
+                            
+                            Spacer()
                         }
+                        
+                        .containerRelativeFrame(.vertical)
                     }
                 }
                 .disabled(viewModel.addingTask)
             
                 if viewModel.addingTask {
-                    backgroundColor
-                        .opacity(viewModel.addingTask ? 0.1 : 0)
-                        .ignoresSafeArea(.all)
+                    Color.clear
+                        .background(.ultraThinMaterial)
+                        .ignoresSafeArea()
                         .transition(.opacity)
                         .onTapGesture {
                             hideTaskEntry()
                         }
                 }
+
+                VStack {
+                    DetailsEntryView(project: projectItem, task: viewModel.selectedTask, isPresented: $viewModel.addingTask)
+                        .id(viewModel.selectedTask?.id)
+                        .frame(height: 150, alignment: .bottom)
+                        .offset(y: viewModel.addingTask ? 0 : 350)
+                        .scaleEffect(viewModel.addingTask ? 1.0 : 0.95)
+                        .opacity(viewModel.addingTask ? 1 : 0)
+                        .padding(.vertical)
+                        .zIndex(1)
+                    
+                    Button {
+                        if viewModel.addingTask {
+                            return hideTaskEntry()
+                        }
+                        
+                        showNewTaskEntry()
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .resizable()
+                            .frame(width: 45, height: 45)
+                            .rotationEffect(viewModel.addingTask ? .degrees(45) : .zero)
+                    }
+                    
+                    .padding()
+                    .disabled(projectItem.isArchived)
+                    .frame(maxWidth: .infinity, alignment: .bottomTrailing)
+                    .background(
+                        LinearGradient(colors: [.clear, .gray.opacity(0.2)], startPoint: .top, endPoint: .bottom)
+                    )
+                }
                 
-                
-                DetailsEntryView(project: projectItem, task: viewModel.selectedTask, isPresented: $viewModel.addingTask)
-                    .id(viewModel.selectedTask?.id)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 150, alignment: .bottom)
-                    .offset(y: viewModel.addingTask ? 0 : 350)
-                    .scaleEffect(viewModel.addingTask ? 1.0 : 0.95)
-                    .opacity(viewModel.addingTask ? 1 : 0)
-                    .padding(.vertical)
-                    .zIndex(1)
+                .frame(maxWidth: .infinity)
             }
             
             .navigationBarTitleDisplayMode(.inline)
@@ -71,26 +107,18 @@ struct DetailsView: View {
                             .font(.caption.bold())
                             .foregroundStyle(projectItem.isArchived ? .red : .green)
                     }
-                }
-                
-                ToolbarItem(placement: .bottomBar) {
-                    Button {
-                        showNewTaskEntry()
-                    } label: {
-                        Label("New task", systemImage: "plus.circle.fill")
-                            .imageScale(.large)
-                    }
                     
-                    .disabled(viewModel.addingTask)
-                    .disabled(projectItem.isArchived)
+                    .opacity(viewModel.addingTask ? 0 : 1)
                 }
                 
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Label("Back", systemImage: "chevron.left")
-                            .labelStyle(.titleAndIcon)
+                    if !viewModel.addingTask {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Label("Back", systemImage: "chevron.left")
+                                .labelStyle(.titleAndIcon)
+                        }
                     }
                 }
             }
@@ -100,11 +128,6 @@ struct DetailsView: View {
         .preferredColorScheme(appearance.colorScheme)
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
-        
-        .task {
-            viewModel.setProject(projectItem)
-        }
-        
         .sheet(isPresented: $viewModel.isEditing){
             DetailsViewSubView(projectItem: projectItem)
         }
@@ -134,10 +157,9 @@ struct DetailsView: View {
         }
     }
     
-
-    func ControlView() -> some View {
+    private var ControlView: some View {
         TabView (selection: $viewModel.selected) {
-            dashBoardView()
+            dashBoardView
                 .tag(0)
             
             HeatMapView(projectColor: Color(hex: projectItem.projectColor), projectTasks: completedTasks)
@@ -148,8 +170,7 @@ struct DetailsView: View {
         .tabViewStyle(.page(indexDisplayMode: .never))
     }
     
-    
-    func dashBoardView() -> some View {
+    private var dashBoardView: some View {
         HStack {
             VStack (alignment: .leading, spacing: 10) {
                 VStack (alignment: .leading, spacing: 0) {
@@ -321,15 +342,11 @@ struct DetailsView: View {
         .padding(.horizontal)
         
         .onTapGesture {
-            if (viewModel.isEditing) {
-
-            }
-            
             showTaskEntry(task: taskItem)
         }
     }
     
-    func emptyView() -> some View {
+    private var emptyView: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color(uiColor: .secondarySystemBackground))
@@ -349,11 +366,10 @@ struct DetailsView: View {
         .padding()
     }
     
-    @ViewBuilder
-    func taskListView() -> some View {
+    private var taskListView: some View {
         ForEach(Status.allCases, id: \.self) { status in
             VStack {
-                if (!projectItem.ProjectTasks.filter { $0.status == status }.isEmpty) {
+                if (!projectItem.projectTasks.filter { $0.status == status }.isEmpty) {
                     HStack {
                         Text(String(describing: status))
                             .foregroundStyle(Color(uiColor: .secondaryLabel))
@@ -365,7 +381,7 @@ struct DetailsView: View {
                     .padding(.horizontal)
                 }
                 
-                ForEach(projectItem.ProjectTasks.filter { $0.status == status }, id: \.id) { task in
+                ForEach(projectItem.projectTasks.filter { $0.status == status }, id: \.id) { task in
                     projectTasksUpdated(task)
                         .opacity(projectItem.isArchived ? 0.7 : 1)
                         .disabled(projectItem.isArchived)
@@ -376,30 +392,11 @@ struct DetailsView: View {
     }
 }
 
-struct DetailView_Previews: PreviewProvider {
-    static var previews: some View {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try! ModelContainer(for: Tag.self, Task.self, configurations: config)
-        
-        let newTag1 = Tag(name: "Testing")
-        let newTag2 = Tag(name: "UI")
-        let newTag3 = Tag(name: "Bugs")
-        let newTag4 = Tag(name: "User study")
-        
-        let newTask = Task(title: "Design task view", desc: "Something Something Something", tag: newTag2, status: .Doing)
-        let newTask1 = Task(title: "Design something", priority: .High)
-        let newTask2 = Task(title: "Design something", tag: newTag1, priority: .High)
-        
-        let newProject = Project(projectName: "Fini", projectColor: "#1E90FF", projectTasks: [newTask, newTask1, newTask2])
-        
-        container.mainContext.insert(newTag1)
-        container.mainContext.insert(newTag2)
-        container.mainContext.insert(newTag3)
-        container.mainContext.insert(newTag4)
-        container.mainContext.insert(newTask)
-        
-        return DetailsView(projectItem: newProject)
-            .modelContainer(container)
-            .environmentObject(AccentColorManager())
-    }
+#Preview {
+    @Previewable @StateObject var accentColor = AccentColorManager()
+    @Previewable @AppStorage("appearance") var appearance: Appearance = .system
+    
+    DetailsView(projectItem: .init(projectName: "Test Project", projectColor: "#555"))
+        .environmentObject(accentColor)
+        .modelContainer(for: [Tag.self, Project.self, Task.self])
 }

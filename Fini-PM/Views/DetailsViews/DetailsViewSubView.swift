@@ -15,13 +15,13 @@ struct DetailsViewSubView: View {
                 
                 Section {
                     NavigationLink(destination: BackLogView(projectItem: projectItem)) {
-                        sectionItem("Backlog", .gray, projectItem.ProjectTasks.filter { $0.status == .Backlog} .count)
+                        sectionItem("Backlog", .gray, projectItem.projectTasks.filter { $0.status == .Backlog} .count)
                     }
                     
                     sectionItem("In Progress", .orange, projectItem.uncompletedTaskCount())
                     
                     NavigationLink(destination: DoneView(projectItem: projectItem)) {
-                        sectionItem("Done", .green, projectItem.ProjectTasks.filter { $0.status == .Done} .count)
+                        sectionItem("Done", .green, projectItem.projectTasks.filter { $0.status == .Done} .count)
                     }
                 }
                 
@@ -133,7 +133,7 @@ struct BackLogView : View {
     var projectItem: Project
     
     var tasks: [Task] {
-        projectItem.ProjectTasks.filter { $0.status == .Backlog }
+        projectItem.projectTasks.filter { $0.status == .Backlog }
     }
     
     var body: some View {
@@ -171,7 +171,7 @@ struct DoneView: View {
     var projectItem: Project
     
     var tasks: [Task] {
-        projectItem.ProjectTasks.filter { $0.status == .Done }
+        projectItem.projectTasks.filter { $0.status == .Done }
     }
     
     var body: some View {

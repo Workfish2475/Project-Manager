@@ -21,25 +21,22 @@ struct ProgressCardView: View {
 
     var body: some View {
         if tasks.isEmpty {
-            emptyView()
+            emptyView
         } else {
-            listView()
+            listView
         }
     }
     
-    @ViewBuilder
-    func emptyView() -> some View {
+    private var emptyView: some View {
         VStack(spacing: 10) {
             HStack {
                 Text(String(describing: currentStatus))
                     .font(.title2.bold())
-                    .fontDesign(.rounded)
                 
                 Spacer()
                 
                 Text("0")
                     .font(.title3.bold())
-                    .fontDesign(.rounded)
             }
             
             .padding()
@@ -58,8 +55,7 @@ struct ProgressCardView: View {
         }
     }
     
-    @ViewBuilder
-    func listView() -> some View {
+    private var listView: some View {
         VStack(spacing: 10) {
             HStack {
                 Text(String(describing: currentStatus))
@@ -89,11 +85,10 @@ struct ProgressCardView: View {
         
         .sheet(item: $selectedTask) {task in
             TaskCardView(taskItem: task)
-                .presentationDetents([.height(500), .large])
+                .presentationDetents([.height(600), .large])
         }
     }
     
-    @ViewBuilder
     func taskItemView(taskItem: Task) -> some View {
         HStack {
             Button {
@@ -110,7 +105,7 @@ struct ProgressCardView: View {
                 taskItem.lastUpdated = .now
             } label: {
                 Image(systemName: taskItem.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(Color(hex: taskItem.project!.projectColor))
+                    .foregroundStyle(Color(hex: taskItem.project.projectColor))
                     .symbolEffect(.bounce, value: taskItem.isCompleted)
             }
             
@@ -118,9 +113,9 @@ struct ProgressCardView: View {
                 Text(taskItem.title)
                     .font(.headline.bold())
                 
-                Text(String(describing: taskItem.project!.projectName))
+                Text(String(describing: taskItem.project.projectName))
                     .font(.caption.bold())
-                    .foregroundStyle(Color(hex: taskItem.project!.projectColor))
+                    .foregroundStyle(Color(hex: taskItem.project.projectColor))
                     .padding(.bottom, 5)
                 
                 if (!taskItem.desc.isEmpty) {
@@ -135,11 +130,11 @@ struct ProgressCardView: View {
                             Text(taskItem.tag!.name)
                                 .font(.caption.bold())
                                 .padding(5)
-                                .foregroundStyle(Color(hex: taskItem.project!.projectColor))
+                                .foregroundStyle(Color(hex: taskItem.project.projectColor))
                                 .background {
                                     RoundedRectangle(cornerRadius: 5) 
-                                        .fill(Color(hex: taskItem.project!.projectColor).opacity(0.1))
-                                        .stroke(Color(hex: taskItem.project!.projectColor), lineWidth: 2)
+                                        .fill(Color(hex: taskItem.project.projectColor).opacity(0.1))
+                                        .stroke(Color(hex: taskItem.project.projectColor), lineWidth: 2)
                                         .clipShape(RoundedRectangle(cornerRadius: 5))
                                 }
                         }
@@ -166,23 +161,11 @@ struct ProgressCardView: View {
     }
 }
 
-struct ProjCardView_Previews: PreviewProvider {
-    static var previews: some View {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try! ModelContainer(for: Tag.self, Task.self, Project.self, configurations: config)
-        
-        let newProject = Project(projectName: "Fini", projectColor: "#b456fs")
-        
-        let newTask1 = Task(title: "Do Something", isCompleted: true, status: .Done, lastUpdated: .now)
-        let newTask2 = Task(title: "Do Something else", isCompleted: true, status: .Done, lastUpdated: .now)
-        
-        newProject.ProjectTasks.append(newTask1)
-        newProject.ProjectTasks.append(newTask2)
-        
-        container.mainContext.insert(newProject)
-        
-        return ProjProgressView()
-            .modelContainer(container)
-            .environmentObject(AccentColorManager())
-    }
+#Preview {
+    @Previewable @StateObject var accentColor = AccentColorManager()
+    @Previewable @AppStorage("appearance") var appearance: Appearance = .system
+    
+    ProgressCardView(currentStatus: .Backlog)
+        .environmentObject(accentColor)
+        .modelContainer(for: [Tag.self, Project.self, Task.self])
 }

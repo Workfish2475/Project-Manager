@@ -1,13 +1,12 @@
 import SwiftUI
 import SwiftData
 
-//TODO: Should use a VM
-//TODO: Should save changes to the task onChange of something
 struct TaskCardView: View {
     var taskItem: Task
     
     @Query private var tags: [Tag]
     
+    //TODO: Move this to a view model
     @State private var titleField: String = ""
     @State private var descField: String = ""
     
@@ -22,94 +21,33 @@ struct TaskCardView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
     
+    init(taskItem: Task) {
+        self.taskItem = taskItem
+        
+        _titleField = State(initialValue: taskItem.title)
+        _descField = State(initialValue: taskItem.desc)
+        
+        if taskItem.tag != nil {
+            _taskItemTag = State(initialValue: taskItem.tag!)
+        }
+    }
+    
+    private var projectColor: Color {
+        return Color(hex: taskItem.project.projectColor)
+    }
+    
     var body: some View {
         NavigationStack {
             ScrollView (.vertical) {
-                VStack (spacing: 0) {
-                    taskTitle()
-                    HStack {
-                        if (taskItem.project != nil) {
-                            Text(taskItem.project!.projectName)
-                                .font(.caption.bold())
-                                .foregroundStyle(Color(hex: taskItem.project!.projectColor))
-                            
-                            Divider()
-                                .frame(width: 2, height: 10)
-                                .overlay(
-                                    Capsule()
-                                        .fill(
-                                            Color(hex: taskItem.project!.projectColor)
-                                        )
-                                )
-                        }
-                        
-                        
-                        Text(taskItem.isCompleted ? "Done" : "Pending")
-                            .foregroundStyle(taskItem.isCompleted ? .green : .orange)
-                            .font(.caption.bold())
-                        
-                        Spacer()
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom)
+                taskTitle
+                
+                Group {
+                    descSection
+                    prioritySection
+                    statusSection
+                    tagSection
                 }
-                
-                TextField("", text: $descField, axis: .vertical)
-                    .font(.system(size: 18))
-                    .scrollContentBackground(.hidden)
-                    .submitLabel(.done)
-                    .scrollIndicators(.hidden)
-                    .focused($editingDesc)
-                    .padding()
-                    .lineLimit(3)
-                    .frame(maxHeight: 100)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(uiColor: .secondarySystemBackground))
-                    )
-                    .padding(.horizontal)
-                    .onChange(of: editingDesc) {
-                        taskItem.desc = descField
-                    }
-                
-                    .overlay {
-                        if descField.isEmpty && !editingDesc {
-                            Text("Add description")
-                                .font(.headline.bold())
-                                .foregroundStyle(Color(uiColor: .secondaryLabel))
-                        }
-                    }
-                
-                    .scaledToFill()
-                
-                HStack {
-                    Text("Priority")
-                    
-                    Spacer()
-                    
-                    Text(String(describing: taskItem.priority))
-                        .foregroundStyle(Color(uiColor: .secondaryLabel))
-                        .fontWeight(.bold)
-                        .fontDesign(.rounded)
-                    
-                    Menu {
-                        Picker("", selection: Binding(
-                            get: { taskItem.priority },
-                            set: { newValue in
-                                taskItem.priority = newValue    
-                            }
-                        )){
-                            ForEach(Priority.allCases, id: \.self){priority in
-                                Text(String(describing: priority))    
-                            }
-                        }
-                    } label: {
-                        Circle()
-                            .fill(taskItem.getPriorityColor())
-                            .frame(width: 20, height: 20)
-                    }
-                }
-                
+               
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 10)
@@ -117,117 +55,7 @@ struct TaskCardView: View {
                 )
                 .padding(.horizontal)
                 
-                HStack {
-                    Text("Status")
-                    
-                    Spacer()
-                    
-                    Text(String(describing: taskItem.status))
-                        .foregroundStyle(Color(uiColor: .secondaryLabel))
-                        .fontWeight(.bold)
-                        .fontDesign(.rounded)
-                    
-                    Menu {
-                        Picker("", selection: Binding(
-                            get: { taskItem.status },
-                            set: { newValue in
-                                taskItem.status = newValue    
-                            }
-                        )) {
-                            ForEach(Status.allCases, id: \.self){status in
-                                Text(String(describing: status))    
-                            }
-                        }
-                    } label: {
-                        //enum here to get relevant image
-                        Image(systemName: taskItem.getStatusImage())
-                            .fontWeight(.bold)
-                            .font(.headline)
-                    }
-                }
-                
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(uiColor: .secondarySystemBackground))
-                )
-                .padding(.horizontal)
-                
-                HStack {
-                    Text("Tag")
-                    
-                    Spacer()
-                    
-                    Text(taskItem.tag != nil ? String(describing: taskItem.tag!.name) : "None")
-                        .foregroundStyle(Color(uiColor: .secondaryLabel))
-                        .fontWeight(.bold)
-                        .fontDesign(.rounded)
-                    
-                    Menu {
-                        VStack(alignment: .leading, spacing: 8) { 
-                            ForEach(tags, id: \.id) { tag in
-                                Button(String(describing: tag.name)) {
-                                    taskItem.tag = tag
-                                }
-                            }
-                            
-                            Divider()
-                            
-                            Button("None") {
-                                taskItem.tag = nil
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "tag.fill")
-                    }                    
-                }
-                
-                .padding()
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(uiColor: .secondarySystemBackground))
-                )
-                .padding(.horizontal)
-                
-                HStack {
-                    Button (role: .destructive) {
-                        presentingConfirm = true
-                    } label: {
-                        Image(systemName: "trash.fill")
-                            .fontWeight(.bold)
-                    }
-                    
-                    Divider()
-                    
-                    if (taskItem.status == .Done) {
-                        Button {
-                            taskItem.isCompleted.toggle()
-                        } label: {
-                            Image(systemName: taskItem.isCompleted ? "xmark" : "checkmark")
-                                .fontWeight(.bold)
-                        }
-                    } else {
-                        Button {
-                            taskItem.updateStatus()
-                            
-                            if (taskItem.status == .Done) {
-                                taskItem.isCompleted = true
-                            } else {
-                                taskItem.isCompleted = false
-                            }
-                        } label: {
-                            Image(systemName: "arrow.right")
-                        }
-                    }
-                }
-                
-                .padding()
-                .background(
-                    Capsule()
-                        .fill(Color(uiColor: .secondarySystemBackground))
-                )
-                .padding()
-                Spacer()
+                controlButtons
             }
             
             .navigationBarTitleDisplayMode(.inline)
@@ -237,6 +65,7 @@ struct TaskCardView: View {
                          dismiss()
                      } label: {
                          Image(systemName: "xmark.circle.fill")
+                             .tint(.secondary)
                              .symbolRenderingMode(.hierarchical)
                      }
                  }
@@ -244,38 +73,189 @@ struct TaskCardView: View {
                  ToolbarItem(placement: .principal) {
                      Text("Edit task")
                          .font(.subheadline.bold())
-                         .fontDesign(.rounded)
                          .foregroundStyle(Color(uiColor: .secondaryLabel))
                  }
              }
         }
         
         .tint(accentColorManager.accentColor)
-        .onAppear() {
-            titleField = taskItem.title
-            
-            if !(taskItem.desc.isEmpty) {
-                descField = taskItem.desc
-            }
-            
-            if (taskItem.tag != nil) {
-                taskItemTag = taskItem.tag
-            }
-        }
     }
     
-    @ViewBuilder
-    func taskTitle() -> some View {
+    private var controlButtons: some View {
         HStack {
+            Button (role: .destructive) {
+                presentingConfirm = true
+            } label: {
+                Image(systemName: "trash.fill")
+                    .fontWeight(.bold)
+            }
+            
+            Divider()
+            
+            if (taskItem.status == .Done) {
+                Button {
+                    taskItem.isCompleted.toggle()
+                } label: {
+                    Image(systemName: taskItem.isCompleted ? "xmark" : "checkmark")
+                        .fontWeight(.bold)
+                }
+            } else {
+                Button {
+                    taskItem.updateStatus()
+                    
+                    if (taskItem.status == .Done) {
+                        taskItem.isCompleted = true
+                    } else {
+                        taskItem.isCompleted = false
+                    }
+                } label: {
+                    Image(systemName: "arrow.right")
+                }
+            }
+        }
+        
+        .padding()
+        .background(
+            Capsule()
+                .fill(Color(uiColor: .secondarySystemBackground))
+        )
+        .padding()
+    }
+    
+    private var taskTitle: some View {
+        VStack (alignment: .leading) {
             TextField(taskItem.title, text: $titleField)
                 .font(.title.bold())
                 .padding(.horizontal)
                 .submitLabel(.done)
             
-            Spacer()
+            HStack (spacing: 5) {
+                Text(taskItem.isCompleted ? "Done" : "Pending")
+                    .foregroundStyle(taskItem.isCompleted ? .green : .orange)
+                    .font(.subheadline.bold())
+                
+                Divider()
+                    
+                Text(taskItem.project.projectName)
+                    .font(.subheadline.bold())
+                    .foregroundStyle(Color(hex: taskItem.project.projectColor))
+            }
+            
+            .padding([.horizontal])
         }
+    }
+    
+    private var descSection: some View {
+        TextField("", text: $descField, axis: .vertical)
+            .font(.system(size: 18))
+            .scrollContentBackground(.hidden)
+            .submitLabel(.done)
+            .scrollIndicators(.hidden)
+            .focused($editingDesc)
+            .lineLimit(3)
+            .frame(maxHeight: 100)
+            .onChange(of: editingDesc) {
+                taskItem.desc = descField
+            }
         
-        .frame(height: 40)
+            .overlay {
+                if descField.isEmpty && !editingDesc {
+                    Text("Add description")
+                        .font(.headline.bold())
+                        .foregroundStyle(Color(uiColor: .secondaryLabel))
+                }
+            }
+        
+            .scaledToFill()
+    }
+    
+    private var prioritySection: some View {
+        HStack {
+            Text("Priority")
+            
+            Spacer()
+            
+            Text(String(describing: taskItem.priority))
+                .foregroundStyle(Color(uiColor: .secondaryLabel))
+                .fontWeight(.bold)
+            
+            Menu {
+                Picker("", selection: Binding(
+                    get: { taskItem.priority },
+                    set: { newValue in
+                        taskItem.priority = newValue
+                    }
+                )){
+                    ForEach(Priority.allCases, id: \.self){priority in
+                        Text(String(describing: priority))
+                    }
+                }
+            } label: {
+                Circle()
+                    .fill(taskItem.getPriorityColor())
+                    .frame(width: 20, height: 20)
+            }
+        }
+    }
+    
+    private var statusSection: some View {
+        HStack {
+            Text("Status")
+            
+            Spacer()
+            
+            Text(String(describing: taskItem.status))
+                .foregroundStyle(Color(uiColor: .secondaryLabel))
+                .fontWeight(.bold)
+            
+            Menu {
+                Picker("", selection: Binding(
+                    get: { taskItem.status },
+                    set: { newValue in
+                        taskItem.status = newValue
+                    }
+                )) {
+                    ForEach(Status.allCases, id: \.self){status in
+                        Text(String(describing: status))
+                    }
+                }
+            } label: {
+                //enum here to get relevant image
+                Image(systemName: taskItem.getStatusImage())
+                    .fontWeight(.bold)
+                    .font(.headline)
+            }
+        }
+    }
+    
+    private var tagSection: some View {
+        HStack {
+            Text("Tag")
+            
+            Spacer()
+            
+            Text(taskItem.tag != nil ? String(describing: taskItem.tag!.name) : "None")
+                .foregroundStyle(Color(uiColor: .secondaryLabel))
+                .fontWeight(.bold)
+            
+            Menu {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(tags, id: \.id) { tag in
+                        Button(String(describing: tag.name)) {
+                            taskItem.tag = tag
+                        }
+                    }
+                    
+                    Divider()
+                    
+                    Button("None") {
+                        taskItem.tag = nil
+                    }
+                }
+            } label: {
+                Image(systemName: "tag.fill")
+            }
+        }
     }
 }
 
@@ -284,12 +264,15 @@ struct TaskCardView_Previews: PreviewProvider {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: Tag.self, Task.self, Project.self, configurations: config)
         
+        let newProject = Project(projectName: "ShipIt", projectColor: "#555")
+        
         let newTag = Tag(name: "Testing")
         let newTag1 = Tag(name: "QoL")
         container.mainContext.insert(newTag)
         container.mainContext.insert(newTag1)
+        container.mainContext.insert(newProject)
         
-        let taskItem = Task(title: "Finish something", desc: "", tag: newTag)
+        let taskItem = Task(title: "Finish something", desc: "", tag: newTag, project: newProject)
         container.mainContext.insert(taskItem)
         
         return TaskCardView(taskItem: taskItem)

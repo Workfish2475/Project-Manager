@@ -11,7 +11,7 @@ class Task {
     var status: Status
     var priority: Priority
     var lastUpdated: Date
-    @Relationship(inverse: \Project.ProjectTasks) var project: Project?
+    var project: Project
     
     init (
         id: UUID = UUID(),
@@ -22,7 +22,7 @@ class Task {
         status: Status = .Backlog,
         priority: Priority = .None,
         lastUpdated: Date = .now,
-        project: Project? = nil
+        project: Project
     ){
         self.id = id
         self.title = title  
@@ -35,8 +35,8 @@ class Task {
         self.project = project
     }
     
-    static func saveTask(taskName: String, taskTag: Tag? = nil, context: ModelContext) {
-        let newTask = Task(title: taskName, tag: taskTag)
+    static func saveTask(taskName: String, taskTag: Tag? = nil, project: Project, context: ModelContext) {
+        let newTask = Task(title: taskName, tag: taskTag, project: project)
         
         context.insert(newTask)
         
@@ -100,10 +100,16 @@ class Task {
     }
 }
 
+//TODO: Implement image var with switch in enum
 enum Status: CaseIterable, Codable {
     case Backlog, Doing, Review, Done
 }
 
+//TODO: Implement image var with switch in enum
 enum Priority: CaseIterable, Codable {
     case None, Low, Medium, High
+}
+
+extension Task {
+    //TODO: Setup some demo placeholder items that can be used in the previews for troubleshooting/debugging
 }

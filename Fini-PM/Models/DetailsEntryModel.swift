@@ -46,7 +46,7 @@ class DetailsEntryModel {
             return
         }
         
-        projectItem.ProjectTasks.append(task)
+        projectItem.projectTasks.append(task)
     }
     
     func saveTask(_ context: ModelContext) {
@@ -100,10 +100,7 @@ class DetailsEntryModel {
     }
     
     func deleteTask(_ task: Task, _ context: ModelContext) {
-        if let project = task.project {
-            project.ProjectTasks.removeAll(where: { $0.id == task.id })
-        }
-        
+        task.project.projectTasks.removeAll(where: { $0.id == task.id })
         context.delete(task)
         
         do {

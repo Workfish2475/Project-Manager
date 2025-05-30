@@ -8,19 +8,18 @@ struct ArchivedProjectsView: View {
     var body: some View {
         NavigationStack {
             if (projects.isEmpty) {
-                emptyView()
+                emptyView
                     .navigationTitle("Archived")
                     .navigationBarTitleDisplayMode(.large)
             } else {
-                listView()
+                listView
                     .navigationTitle("Archived projects")
                     .navigationBarTitleDisplayMode(.large)
             }
         }
     }
     
-    @ViewBuilder
-    func emptyView() -> some View {
+    private var emptyView: some View {
         VStack (alignment: .center, spacing: 10) {
             Image(systemName: "archivebox.circle.fill")
                 .resizable()
@@ -34,8 +33,7 @@ struct ArchivedProjectsView: View {
         }
     }
     
-    @ViewBuilder
-    func listView() -> some View {
+    private var listView: some View {
         List {
             ForEach(projects, id: \.id){project in
                 Text(project.projectName)    

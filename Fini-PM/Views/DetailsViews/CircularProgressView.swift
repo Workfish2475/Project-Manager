@@ -14,7 +14,6 @@ struct CircularProgressView: View {
                     ringColor.opacity(0.5),
                     lineWidth: 10
                 )
-            
             HStack (alignment: .lastTextBaseline, spacing: 0) {
                 Text(String(format: "%.0f%", progress * 100))
                     .font(.title.bold())
@@ -23,7 +22,7 @@ struct CircularProgressView: View {
                     .font(.footnote.bold())
                     .foregroundStyle(Color(uiColor: .secondaryLabel))
             }
-            
+
             Circle()
                 .trim(from: 0, to: progress)
                 .stroke(
@@ -33,14 +32,11 @@ struct CircularProgressView: View {
                         lineCap: .round
                     )
                 )
-            
                 .rotationEffect(.degrees(-90))
                 .animation(.easeOut, value: progress)
         }
-        
         .padding()
     }
-
 }
 
 #Preview {
