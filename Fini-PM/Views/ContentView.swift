@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     @State private var selectedItem: Int = 0
@@ -38,7 +39,12 @@ struct ContentView: View {
     @Previewable @StateObject var accentColor = AccentColorManager()
     @Previewable @AppStorage("appearance") var appearance: Appearance = .system
     
+    let container = try! ModelContainer(
+        for: Tag.self, Project.self, Task.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    
     ContentView()
         .environmentObject(accentColor)
-        .modelContainer(for: [Tag.self, Project.self, Task.self])
+        .modelContainer(container)
 }

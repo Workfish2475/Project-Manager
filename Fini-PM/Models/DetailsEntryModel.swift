@@ -99,14 +99,15 @@ class DetailsEntryModel {
         taskItem.tag = tag
     }
     
-    func deleteTask(_ task: Task, _ context: ModelContext) {
-        task.project.projectTasks.removeAll(where: { $0.id == task.id })
-        context.delete(task)
-        
-        do {
-            try context.save()
-        } catch {
-            print("Error deleting task: \(error)")
+    func deleteTask(_ task: Task? = nil, _ context: ModelContext) {
+        if let task = task {
+            context.delete(task)
+            
+            do {
+                try context.save()
+            } catch {
+                print("Error deleting task: \(error)")
+            }
         }
     }
 }

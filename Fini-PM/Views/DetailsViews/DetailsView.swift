@@ -40,6 +40,7 @@ struct DetailsView: View {
                             Group {
                                 if (projectItem.projectTasks.isEmpty) {
                                     emptyView
+                                        .frame(height: geo.size.height - 200)
                                 } else {
                                     taskListView
                                 }
@@ -47,10 +48,9 @@ struct DetailsView: View {
                             
                             Spacer()
                         }
-                        
-                        .containerRelativeFrame(.vertical)
                     }
                 }
+                
                 .disabled(viewModel.addingTask)
             
                 if viewModel.addingTask {
@@ -90,7 +90,7 @@ struct DetailsView: View {
                     .disabled(projectItem.isArchived)
                     .frame(maxWidth: .infinity, alignment: .bottomTrailing)
                     .background(
-                        LinearGradient(colors: [.clear, .gray.opacity(0.2)], startPoint: .top, endPoint: .bottom)
+                        LinearGradient(colors: [.clear, .black.opacity(0.1)], startPoint: .top, endPoint: .bottom)
                     )
                 }
                 
@@ -347,22 +347,23 @@ struct DetailsView: View {
     }
     
     private var emptyView: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(uiColor: .secondarySystemBackground))
-            
-            VStack (alignment: .center, spacing: 10) {
-                Spacer()
-                Image(systemName: "tray.circle.fill")
-                    .resizable()
-                    .frame(width: 50, height: 50)
-                    .foregroundStyle(Color(hex: projectItem.projectColor))
-                Text("No tasks added to project")
-                    .font(.headline.bold())
-                Spacer()
-            }
+        VStack (alignment: .center, spacing: 10) {
+            Spacer()
+            Image(systemName: "tray.circle.fill")
+                .resizable()
+                .frame(width: 50, height: 50)
+                .foregroundStyle(Color(hex: projectItem.projectColor))
+            Text("No tasks added to project")
+                .font(.headline.bold())
+            Spacer()
         }
         
+        
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(uiColor: .secondarySystemBackground))
+        )
         .padding()
     }
     

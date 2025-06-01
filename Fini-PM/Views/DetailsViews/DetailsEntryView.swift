@@ -22,11 +22,10 @@ struct DetailsEntryView: View {
         self.project = project
         let viewModel = DetailsEntryModel()
         viewModel.setProjectItem(project)
-        
         if let task = task {
+            self.task = task
             viewModel.setTaskItem(task)
         }
-        
         _viewModel = State(initialValue: viewModel)
         _isPresented = isPresented
     }
@@ -146,11 +145,8 @@ struct DetailsEntryView: View {
                     }
                     
                     Button {
-                        if let task = viewModel.taskItem {
-                            viewModel.deleteTask(task, modelContext)
-                        }
-                        
                         dismissView()
+                        viewModel.deleteTask(task, modelContext)
                     } label: {
                         Image(systemName: "trash.fill")
                             .frame(height: 20)
@@ -174,13 +170,6 @@ struct DetailsEntryView: View {
                 .frame(minWidth: 350, maxHeight: 400)
                 .presentationCompactAdaptation(.popover)
         }
-        
-        .task {
-            viewModel.setProjectItem(project)
-            if let task = task {
-                viewModel.setTaskItem(task)
-            }
-        }
     }
     
     private func dismissView() {
@@ -189,33 +178,3 @@ struct DetailsEntryView: View {
         }
     }
 }
-
-//struct DetailEntryView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-//        let container = try! ModelContainer(for: Tag.self, Task.self, Project.self, configurations: config)
-//        
-//        let newTag1 = Tag(name: "Testing")
-//        let newTag2 = Tag(name: "UI")
-//        let newTag3 = Tag(name: "Bugs")
-//        let newTag4 = Tag(name: "User study")
-//        
-//        let newTask = Task(title: "Design task view", desc: "", tag: newTag2)
-//        let newTask1 = Task(title: "Design task view", tag: newTag1)
-//        
-//        let newProject = Project(projectName: "Fini", projectColor: "#1E90FF", projectTasks: [newTask, newTask1, newTask, newTask, newTask, newTask, newTask])
-//        
-//        container.mainContext.insert(newTag1)
-//        container.mainContext.insert(newTag2)
-//        container.mainContext.insert(newTag3)
-//        container.mainContext.insert(newTag4)
-//        container.mainContext.insert(newTask)
-//        container.mainContext.insert(newTask1)
-//        container.mainContext.insert(newProject)
-//        
-//        return DetailsEntryView(project: newProject, task: newTask, isPresented: .constant(true))
-//            .modelContainer(container)
-//            .environmentObject(AccentColorManager())
-//            .padding(50)
-//    }
-//}

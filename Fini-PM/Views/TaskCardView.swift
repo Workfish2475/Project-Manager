@@ -116,14 +116,13 @@ struct TaskCardView: View {
                 .tint(.secondary)
 
                 Button(role: .destructive) {
-                    // Dismiss view first
                     dismiss()
-                    
-                    //Perform deletion by removing the task from the projectTasks then deleting from context
+                    context.delete(taskItem)
                 } label: {
                     Label("Trash", systemImage: "trash.fill")
                         .frame(maxWidth: .infinity)
                 }
+                .tint(.red)
                 .buttonStyle(.borderedProminent)
             }
             

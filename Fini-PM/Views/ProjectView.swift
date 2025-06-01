@@ -180,7 +180,7 @@ struct ProjectView: View {
                         
                         VStack {
                             CircularProgressView(progress: project.progressValue(), ringColor: Color(hex:project.projectColor))
-                                .tint(.black)
+                                .tint(.primary)
                                 .background(
                                     RoundedRectangle(cornerRadius: 10)
                                         .fill(.ultraThinMaterial)
@@ -188,7 +188,7 @@ struct ProjectView: View {
                             
                             Text("\(project.projectName)")
                                 .font(.title3.bold())
-                                .foregroundStyle(.black)
+                                .foregroundStyle(Color(hex: project.projectColor))
                         }
                         
                         .padding()
