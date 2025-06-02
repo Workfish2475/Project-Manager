@@ -21,7 +21,6 @@ struct SplashScreen: View {
         }
     }
     
-    @ViewBuilder
     func newDesc() -> some View {
         ZStack {
             Color(uiColor: .secondarySystemBackground)
@@ -40,7 +39,6 @@ struct SplashScreen: View {
         .padding()
     }
     
-    @ViewBuilder
     func itemEntry(_ imageName: String, _ title: String, _ desc: String) -> some View {
         HStack {
             Image(systemName: "gear.circle.fill")
