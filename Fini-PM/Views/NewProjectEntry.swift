@@ -16,14 +16,6 @@ struct NewProjectEntry: View {
     
     @State var showColorPicker: Bool = false
     
-    // State vars for devices/platforms
-    @State private var isMobile: Bool = false
-    @State private var isPad: Bool = false
-    @State private var isComputer: Bool = false
-    @State private var isTv: Bool = false
-    @State private var isWeb: Bool = false
-    @State private var isWatch: Bool = false
-    
     var body: some View {
         VStack {
             entrySection
@@ -103,46 +95,44 @@ struct NewProjectEntry: View {
                 HStack {
                     deviceItem("Mobile", "iphone")
                         .frame(width: 60, height: 60)
-                        .foregroundStyle(isMobile ? .blue : .primary)
+                        .foregroundStyle(viewModel.isMobile ? .blue : .primary)
                         .onTapGesture {
-                            toggleDevice(&isMobile)
+                            toggleDevice(&viewModel.isMobile)
                         }
                     
                     deviceItem("Tablet", "ipad")
                         .frame(width: 60, height: 60)
-                        .foregroundStyle(isPad ? .blue : .primary)
+                        .foregroundStyle(viewModel.isPad ? .blue : .primary)
                         .onTapGesture {
-                            toggleDevice(&isPad)
+                            toggleDevice(&viewModel.isPad)
                         }
                     
                     deviceItem("Desktop", "desktopcomputer")
                         .frame(width: 60, height: 60)
-                        .foregroundStyle(isComputer ? .blue : .primary)
+                        .foregroundStyle(viewModel.isDesktop ? .blue : .primary)
                         .onTapGesture {
-                            toggleDevice(&isComputer)
+                            toggleDevice(&viewModel.isDesktop)
                         }
                     
                     deviceItem("Watch", "applewatch")
                         .frame(width: 60, height: 60)
-                        .foregroundStyle(isWatch ? .blue : .primary)
+                        .foregroundStyle(viewModel.isWatch ? .blue : .primary)
                         .onTapGesture {
-                            toggleDevice(&isWatch)
+                            toggleDevice(&viewModel.isWatch)
                         }
                     
                     deviceItem("Tv", "tv")
                         .frame(width: 60, height: 60)
-                        .foregroundStyle(isTv ? .blue : .primary)
+                        .foregroundStyle(viewModel.isTv ? .blue : .primary)
                         .onTapGesture {
-                            toggleDevice(&isTv)
+                            toggleDevice(&viewModel.isTv)
                         }
-                    
-                    
                     
                     deviceItem("Web", "safari.fill")
                         .frame(width: 60, height: 60)
-                        .foregroundStyle(isWeb ? .blue : .primary)
+                        .foregroundStyle(viewModel.isWeb ? .blue : .primary)
                         .onTapGesture {
-                            toggleDevice(&isWeb)
+                            toggleDevice(&viewModel.isWeb)
                         }
                 }
             }

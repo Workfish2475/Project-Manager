@@ -37,28 +37,6 @@ struct Settings: View {
                         }
                     }
                 }
-                
-                Section {
-                    HStack {
-                        Spacer()
-                        
-                        VStack {
-                            Spacer()
-                            
-                            Text("Fini")
-                                .font(.headline.bold())
-                                .foregroundStyle(Color(uiColor: .secondaryLabel))
-                            
-                            Text("Made by Alex")
-                                .font(.caption)
-                                .foregroundStyle(Color(uiColor: .secondaryLabel))
-                        }
-                        
-                        Spacer()
-                    }
-                }
-                
-                .listRowBackground(colorScheme == .light ? Color(uiColor: .secondarySystemBackground) : Color(uiColor: .systemBackground))
             }
 
             .tint(accentColorManager.accentColor)

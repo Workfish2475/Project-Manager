@@ -173,28 +173,32 @@ struct ProjectView: View {
             ForEach(projects, id: \.id) { project in
                 NavigationLink(destination: DetailsView(projectItem: project)) {
                     
-                    //TODO: Extract this to its own view var
                     ZStack {
                         RoundedRectangle(cornerRadius: 10)
                             .fill(.thinMaterial)
                         
                         VStack {
                             CircularProgressView(progress: project.progressValue(), ringColor: Color(hex:project.projectColor))
-                                .tint(.primary)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(.ultraThinMaterial)
-                                )
-                            
+                                .foregroundStyle(scheme == .dark ? .white : .black)
+                                
                             Text("\(project.projectName)")
                                 .font(.title3.bold())
-                                .foregroundStyle(Color(hex: project.projectColor))
+                                .foregroundStyle(scheme == .dark ? .white : .black)
                         }
                         
                         .padding()
                     }
                     
                     .contextMenu {
+                        Button {
+                            project.isArchived.toggle()
+                        } label: {
+                            Label("Archive", systemImage: "archivebox")
+                                .tint(.primary)
+                        }
+                        
+                        Divider()
+                        
                         Button (role: .destructive) {
                             for task in project.projectTasks {
                                 context.delete(task)
@@ -204,6 +208,8 @@ struct ProjectView: View {
                         } label: {
                             Label("Trash", systemImage: "trash.fill")
                         }
+                        
+                        .tint(.red)
                     }
                 }
             }
@@ -268,11 +274,26 @@ struct ProjectView: View {
     }
 }
 
-#Preview {
+#Preview ("Project View") {
     @Previewable @StateObject var accentColor = AccentColorManager()
     @Previewable @AppStorage("appearance") var appearance: Appearance = .system
     
+    let container = try! ModelContainer(
+        for: Tag.self, Project.self, Task.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    
     ProjectView()
         .environmentObject(accentColor)
-        .modelContainer(for: [Tag.self, Project.self, Task.self])
+        .modelContainer(container)
+}
+
+#Preview ("Project Grid Item") {
+    @Previewable @StateObject var accentColor = AccentColorManager()
+    @Previewable @AppStorage("appearance") var appearance: Appearance = .system
+    
+    let projects: [Project] = [.init(projectName: "Demonstration", projectColor: "#FF3800")]
+    
+    ProjectView().projectLinksGrid(projects)
+        .environmentObject(accentColor)
 }

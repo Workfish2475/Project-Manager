@@ -7,6 +7,7 @@ class Project {
     var projectName: String
     var projectColor: String
     var isArchived: Bool
+    var gitURL: String
     
     @Relationship(deleteRule: .cascade, inverse: \Task.project) var projectTasks: [Task]
     
@@ -59,12 +60,14 @@ class Project {
         projectColor: String,
         projectTasks: [Task] = [],
         isArchived: Bool = false,
+        gitURL: String = ""
     ) {
         self.id = id
         self.projectName = projectName
         self.projectColor = projectColor
         self.projectTasks = projectTasks
         self.isArchived = isArchived
+        self.gitURL = gitURL
         
         self.isMobile = supportedDevices.contains(.Mobile)
         self.isPad = supportedDevices.contains(.Tablet)

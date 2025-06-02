@@ -57,11 +57,6 @@ struct TagPickerView: View {
     @ViewBuilder
     func tagList() -> some View {
         ScrollView (.vertical) {
-            Divider()
-                .hidden()
-            
-            Spacer()
-            
             FlowLayout(spacing: 5, alignment: .center) {
                 ForEach(tagItems, id: \.id) { tag in
                     tagItem(tag)
@@ -98,7 +93,7 @@ struct TagPickerView: View {
             .fontDesign(.rounded)
             .background(
                 Capsule()
-                    .fill(accentColorManager.accentColor)
+                    .fill(accentColorManager.accentColor.gradient)
             )
     }
     
@@ -108,7 +103,6 @@ struct TagPickerView: View {
             .foregroundStyle(accentColorManager.accentColor)
             .padding(.horizontal)
             .padding(.vertical, 10)
-            .fontDesign(.rounded)
             .background(
                 Capsule()
                     .fill(accentColorManager.accentColor.opacity(0.4))
@@ -131,7 +125,6 @@ struct TagPickerView: View {
             .padding(.horizontal)
             .padding(.vertical, 10)
             .tint(.white)
-            .fontDesign(.rounded)
             .focused($tagField)
             .submitLabel(.done)
             .onSubmit {
@@ -139,7 +132,7 @@ struct TagPickerView: View {
             }
             .background(
                 Capsule()
-                    .fill(accentColorManager.accentColor)
+                    .fill(accentColorManager.accentColor.gradient)
             )
     }
     
@@ -180,7 +173,7 @@ struct TagPickerView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(uiColor: .secondarySystemBackground))
+                .fill(.ultraThinMaterial)
             
         )
         .padding()
@@ -192,17 +185,17 @@ struct TagPickerView_Previews: PreviewProvider {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try! ModelContainer(for: Tag.self, configurations: config)
         
-//        let newTag1 = Tag(name: "Testing")
-//        let newTag2 = Tag(name: "Backend")
-//        let newTag3 = Tag(name: "UX")
-//        let newTag4 = Tag(name: "User studies")
-//        let newTag5 = Tag(name: "Pricing")
-//        
-//        container.mainContext.insert(newTag1)
-//        container.mainContext.insert(newTag2)
-//        container.mainContext.insert(newTag3)
-//        container.mainContext.insert(newTag4)
-//        container.mainContext.insert(newTag5)
+        let newTag1 = Tag(name: "Testing")
+        let newTag2 = Tag(name: "Backend")
+        let newTag3 = Tag(name: "UX")
+        let newTag4 = Tag(name: "User studies")
+        let newTag5 = Tag(name: "Pricing")
+        
+        container.mainContext.insert(newTag1)
+        container.mainContext.insert(newTag2)
+        container.mainContext.insert(newTag3)
+        container.mainContext.insert(newTag4)
+        container.mainContext.insert(newTag5)
         
         return TagPickerView()
             .modelContainer(container)

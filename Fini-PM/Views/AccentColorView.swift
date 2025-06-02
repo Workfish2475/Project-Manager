@@ -8,13 +8,13 @@ struct AccentColorView: View {
         NavigationStack {
             colorGrid()
         }
+        .navigationTitle("Accent Color")
         .toolbar {
             ToolbarItem {
                 ColorPicker("", selection: accentColorManager.$accentColor, supportsOpacity: false)
                     .labelsHidden()
             }
         }
-        .navigationTitle("Accent Color")
     }
     
     @ViewBuilder
@@ -28,19 +28,17 @@ struct AccentColorView: View {
                         .onTapGesture {
                             accentColorManager.accentColor = Color.allList[index]
                         }
-                    
-                        .overlay {
-                            if Color.allList[index] == accentColorManager.accentColor {
-                                Image(systemName: "checkmark")
-                                    .font(.largeTitle)
-                                    .fontWeight(.medium)
-                            }
-                        }
                 }
             }
         }
         
         .scrollIndicators(.hidden)
-        .padding()
     }
+}
+
+#Preview {
+    @Previewable @StateObject var accentColor = AccentColorManager()
+    
+    AccentColorView()
+        .environmentObject(accentColor)
 }
